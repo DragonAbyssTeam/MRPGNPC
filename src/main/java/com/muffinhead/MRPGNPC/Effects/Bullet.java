@@ -1,6 +1,5 @@
 package com.muffinhead.MRPGNPC.Effects;
 
-import cn.nukkit.Player;
 import cn.nukkit.entity.Entity;
 import cn.nukkit.entity.projectile.EntityProjectile;
 import cn.nukkit.event.Event;
@@ -11,20 +10,20 @@ import cn.nukkit.level.format.FullChunk;
 import cn.nukkit.math.AxisAlignedBB;
 import cn.nukkit.math.Vector3;
 import cn.nukkit.nbt.tag.CompoundTag;
-import com.muffinhead.MRPGNPC.NPCs.MobNPC;
 
 public class Bullet extends EntityProjectile {
-    int networkID = 81;
-    Position spawnPosition;
     public double MaxDistance = 0;
     public float damage = 0f;
     public float knockback = 0f;
+    public Entity master;
+    int networkID = 81;
+    Position spawnPosition;
     double motionx = 0;
     double motiony = 0;
     double motionz = 0;
     double fyaw = 0;
     double fpitch = 0;
-    public Entity master;
+
     public Bullet(FullChunk chunk, CompoundTag nbt, Entity entity, int networkID, Vector3 motion, double yaw, double pitch) {
         super(chunk, nbt);
         this.shootingEntity = entity;
@@ -50,7 +49,7 @@ public class Bullet extends EntityProjectile {
     @Override
     public boolean entityBaseTick(int i) {
         if (!this.isClosed()) {
-            if (this.getPosition()!=null) {
+            if (this.getPosition() != null) {
                 try {
                     if (this.getPosition().distance(spawnPosition) >= MaxDistance) {
                         this.close();
@@ -63,6 +62,7 @@ public class Bullet extends EntityProjectile {
         }
         return super.entityBaseTick(i);
     }
+
     @Override
     public void onCollideWithEntity(Entity entity) {
         ProjectileHitEvent e = new ProjectileHitEvent(this, MovingObjectPosition.fromEntity(entity));
@@ -104,7 +104,7 @@ public class Bullet extends EntityProjectile {
                 if (this.isAlive()) {
                     MovingObjectPosition movingObjectPosition = null;
                     if (!this.isCollided) {
-                        this.motionY -= (double)this.getGravity();
+                        this.motionY -= (double) this.getGravity();
                     }
                     Vector3 moveVector = new Vector3(this.x + this.motionX, this.y + this.motionY, this.z + this.motionZ);
                     Entity[] list = this.getLevel().getCollidingEntities(this.boundingBox.addCoord(this.motionX, this.motionY, this.motionZ).expand(1.0D, 1.0D, 1.0D), this);
@@ -113,9 +113,9 @@ public class Bullet extends EntityProjectile {
                     Entity[] var10 = list;
                     int var11 = list.length;
 
-                    for(int var12 = 0; var12 < var11; ++var12) {
+                    for (int var12 = 0; var12 < var11; ++var12) {
                         Entity entity = var10[var12];
-                        if (entity == shootingEntity){
+                        if (entity == shootingEntity) {
                             entity = null;
                         }
                         if (entity != null) {

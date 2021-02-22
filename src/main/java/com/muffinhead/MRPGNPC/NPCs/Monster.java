@@ -4,6 +4,7 @@ import cn.nukkit.event.Listener;
 import cn.nukkit.item.Item;
 
 import java.util.HashMap;
+
 //copy mobplugin
 public interface Monster {
     final class ArmorPoints extends HashMap<Integer, Float> implements Listener {

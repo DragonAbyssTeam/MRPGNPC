@@ -2,34 +2,28 @@ package com.muffinhead.MRPGNPC.Tasks;
 
 import cn.nukkit.Player;
 import cn.nukkit.entity.Entity;
-import cn.nukkit.level.Level;
 import cn.nukkit.level.Location;
-import cn.nukkit.level.Position;
 import cn.nukkit.scheduler.Task;
 import cn.nukkit.utils.Config;
 import com.muffinhead.MRPGNPC.MRPGNPC;
 import com.muffinhead.MRPGNPC.NPCs.MobNPC;
 
-import javax.swing.*;
-import java.io.File;
-import java.io.IOException;
-import java.io.Serializable;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class AutoSpawn extends Task {
-    protected ConcurrentHashMap<String,Integer> spawnTick = new ConcurrentHashMap<>();
-    public static ConcurrentHashMap<String,Integer> mobAmount = new ConcurrentHashMap<>();
+    public static ConcurrentHashMap<String, Integer> mobAmount = new ConcurrentHashMap<>();
+    protected ConcurrentHashMap<String, Integer> spawnTick = new ConcurrentHashMap<>();
+
     @Override
     public void onRun(int i) {
         //spawntick
-        for (String s:spawnTick.keySet()){
-            spawnTick.put(s,spawnTick.get(s)+1);
+        for (String s : spawnTick.keySet()) {
+            spawnTick.put(s, spawnTick.get(s) + 1);
         }
 
         //spawn
-        for (Config config:MRPGNPC.pointconfigs.values()) {
+        for (Config config : MRPGNPC.pointconfigs.values()) {
             //spawnpoint position
 
             if (!MRPGNPC.mrpgnpc.getServer().loadLevel(config.getString("PointPosition").split(":")[3])) {
@@ -107,9 +101,9 @@ public class AutoSpawn extends Task {
                             npc.spawnToAll();
                         } catch (Exception e) {
                             System.out.println("Spawn Wrong！");
-                            System.out.println("MobFile"+mobfile);
-                            System.out.println("Location"+location);
-                            System.out.println("MobFeature"+mobFeature);
+                            System.out.println("MobFile" + mobfile);
+                            System.out.println("Location" + location);
+                            System.out.println("MobFeature" + mobFeature);
                         }
                     }
                     spawnTick.put(mobFeature, 0);
@@ -117,7 +111,8 @@ public class AutoSpawn extends Task {
             }
         }
     }
-    public boolean onCheckSpawnLimit(String limit,Location location){
+
+    public boolean onCheckSpawnLimit(String limit, Location location) {
         boolean canSpawn = true;
         String condition = limit;
         String function = "";
@@ -127,13 +122,13 @@ public class AutoSpawn extends Task {
         }
         switch (condition) {
             case "atDay": {
-                if (location.getLevel().getTime()>=13800&&location.getLevel().getTime()<24000) {
+                if (location.getLevel().getTime() >= 13800 && location.getLevel().getTime() < 24000) {
                     canSpawn = false;
                 }
                 break;
             }
             case "atNight": {
-                if (location.getLevel().getTime()>=0&&location.getLevel().getTime()<13800) {
+                if (location.getLevel().getTime() >= 0 && location.getLevel().getTime() < 13800) {
                     canSpawn = false;
                 }
                 break;

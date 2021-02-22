@@ -14,6 +14,7 @@ public class Lightning extends EntityLightning {
     public Lightning(FullChunk chunk, CompoundTag nbt) {
         super(chunk, nbt);
     }
+
     protected void initEntity() {
         super.initEntity();
         this.setHealth(4.0F);
@@ -65,7 +66,7 @@ public class Lightning extends EntityLightning {
                     Entity[] var9 = this.level.getCollidingEntities(bb, this);
                     int var10 = var9.length;
 
-                    for(int var6 = 0; var6 < var10; ++var6) {
+                    for (int var6 = 0; var6 < var10; ++var6) {
                         Entity entity = var9[var6];
                         entity.onStruckByLightning(this);
                     }

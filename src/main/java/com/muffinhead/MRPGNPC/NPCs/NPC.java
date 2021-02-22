@@ -10,16 +10,13 @@ import cn.nukkit.entity.item.EntityItem;
 import cn.nukkit.entity.projectile.EntityProjectile;
 import cn.nukkit.event.entity.EntityDamageByEntityEvent;
 import cn.nukkit.event.entity.EntityDamageEvent;
-import cn.nukkit.event.entity.EntityDeathEvent;
-import cn.nukkit.event.player.PlayerDeathEvent;
-import cn.nukkit.event.player.PlayerToggleSneakEvent;
 import cn.nukkit.item.Item;
-import cn.nukkit.level.Level;
 import cn.nukkit.level.Position;
 import cn.nukkit.level.format.FullChunk;
 import cn.nukkit.level.particle.DestroyBlockParticle;
-import cn.nukkit.level.particle.Particle;
-import cn.nukkit.math.*;
+import cn.nukkit.math.MathHelper;
+import cn.nukkit.math.NukkitMath;
+import cn.nukkit.math.Vector3;
 import cn.nukkit.nbt.NBTIO;
 import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.nbt.tag.DoubleTag;
@@ -33,95 +30,56 @@ import cn.nukkit.potion.Effect;
 import cn.nukkit.scheduler.Task;
 import com.muffinhead.MRPGNPC.MRPGNPC;
 import com.muffinhead.mdungeon.DataPacketLimit;
-import com.muffinhead.mdungeon.MDungeon;
-import com.muffinhead.mdungeon.Room;
 
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
-import java.awt.im.InputContext;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadLocalRandom;
 
-import static java.lang.Integer.parseInt;
-
 
 public class NPC extends EntityHuman {
+    public int nhhealtick = 0;
+    public List<String> skills = new ArrayList<>();
+    public ConcurrentHashMap<String, Object> status = new ConcurrentHashMap<>();
     protected boolean isAttacking = false;
-
     protected String camp = "Example";
-
     protected Position spawnPosition;
-
     protected String geometryName = "";
-
     protected String mobFeature = "";
-
     protected String skinname = "";
-
-    private double frontX;
-
-    private double frontY;
-
-    private double frontZ;
-
     protected double speed = 1.0;
 
     protected Entity target = null;
 
     protected double attackrange = 1.0;
-
-    public int nhhealtick = 0;
-
     protected double hitrange = 0.2;
-
     protected double damage = 3.0;
-
     protected String displayName = "";
-
     protected double knockback = 0.1;
-
     protected String defenseformula = "source.damage";
-
     protected int attackdelay = 30;
-
     protected int attackdelayed = 0;
-
     protected int damagedelay = 0;
-
     protected ConcurrentHashMap<Entity, Integer> bedamageCD = new ConcurrentHashMap<>();
-
     protected int bedamageddelay = 0;
-
     protected double haterange = 15.0;
-
     protected String nohatesheal = "200:1.0";
-
     protected boolean canbeknockback = false;
-
     protected List<String> deathcommands = new ArrayList<>();
-
     protected String bedamagedblockparticle = "152:0";
-
     protected List<String> drops = new ArrayList<>();
-
     protected ConcurrentHashMap<Entity, Integer> cantAttractiveTarget = new ConcurrentHashMap<>();
-
     protected ConcurrentHashMap<Entity, Float> damagePool = new ConcurrentHashMap<>();
-
     protected ConcurrentHashMap<Entity, Float> hatePool = new ConcurrentHashMap<>();
-
     protected List<String> activeattackcreature = new ArrayList<>();
-
     protected List<String> unattractivecreature = new ArrayList<>();
-
-    public List<String> skills = new ArrayList<>();
-
     protected boolean enableBox = true;
-
-    public ConcurrentHashMap<String,Object> status = new ConcurrentHashMap<>();
+    private double frontX;
+    private double frontY;
+    private double frontZ;
 
 
     public NPC(FullChunk chunk, CompoundTag nbt) {
@@ -137,6 +95,54 @@ public class NPC extends EntityHuman {
 
         this.teleport(new Vector3(this.x - 0.1, this.y, this.z - 0.1));
     }
+
+    public static List<Entity> getMaxValueList(ConcurrentHashMap<Entity, Float> map) {
+        double max = 0.0f;
+        String temp = "";
+        double value = 0.0f;
+        List<Entity> list = new ArrayList<>();
+        for (Entity entity : map.keySet()) {
+            value = map.get(entity);
+            if (max < value) {
+                max = value;
+                list.clear();
+                list.add(entity);
+            } else if (max == value) {
+                list.add(entity);
+            }
+        }
+        return list;
+    }
+
+    public static Entity getMaxValue(ConcurrentHashMap<Entity, Float> map) {
+        double max = -100000000000000000000000000000000000000.0F;
+        Entity temp = null;
+        double value = 0.0D;
+        for (Entity key : map.keySet()) {
+            value = map.get(key);
+            if (max < value) {
+                max = value;
+                temp = key;
+            }
+        }
+        return temp;
+    }
+
+    public static Entity getMinValue(ConcurrentHashMap<Entity, Float> map) {
+        float min = 100000000000000000000000000000000000000.0F;
+        Entity temp = null;
+        float value = 0.0F;
+        for (Entity key : map.keySet()) {
+            value = map.get(key);
+            if (min > value) {
+                min = value;
+                temp = key;
+            }
+        }
+        return temp;
+    }
+
+    //entity everytick do
 
     public void setSkin(Skin skin) {
         this.skin = skin;
@@ -244,10 +250,10 @@ public class NPC extends EntityHuman {
         }
         if (enableBox) {
             for (Entity entity : this.getLevel().getEntities()) {
-                if (!(entity instanceof EntityProjectile||entity instanceof EntityItem)) {
-                    if (entity instanceof MobNPC&&!((MobNPC) entity).enableBox) {
+                if (!(entity instanceof EntityProjectile || entity instanceof EntityItem)) {
+                    if (entity instanceof MobNPC && !((MobNPC) entity).enableBox) {
 
-                    }else {
+                    } else {
                         if (this.distance(entity) <= 0.4 * this.scale) {
                             double x1 = this.x;
                             double z1 = this.z;
@@ -264,8 +270,6 @@ public class NPC extends EntityHuman {
             }
         }
     }
-
-    //entity everytick do
 
     //displaynameupdate
     public void updateDisplayName() {
@@ -386,52 +390,6 @@ public class NPC extends EntityHuman {
             hasWall = false;
         }
         return hasWall;
-    }
-
-    public static List<Entity> getMaxValueList(ConcurrentHashMap<Entity, Float> map) {
-        double max = 0.0f;
-        String temp = "";
-        double value = 0.0f;
-        List<Entity> list = new ArrayList<>();
-        for (Entity entity : map.keySet()) {
-            value = map.get(entity);
-            if (max < value) {
-                max = value;
-                list.clear();
-                list.add(entity);
-            } else if (max == value) {
-                list.add(entity);
-            }
-        }
-        return list;
-    }
-
-    public static Entity getMaxValue(ConcurrentHashMap<Entity, Float> map) {
-        double max = -100000000000000000000000000000000000000.0F;
-        Entity temp = null;
-        double value = 0.0D;
-        for (Entity key : map.keySet()) {
-            value = map.get(key);
-            if (max < value) {
-                max = value;
-                temp = key;
-            }
-        }
-        return temp;
-    }
-
-    public static Entity getMinValue(ConcurrentHashMap<Entity, Float> map) {
-        float min = 100000000000000000000000000000000000000.0F;
-        Entity temp = null;
-        float value = 0.0F;
-        for (Entity key : map.keySet()) {
-            value = map.get(key);
-            if (min > value) {
-                min = value;
-                temp = key;
-            }
-        }
-        return temp;
     }
 
     @Override
@@ -555,7 +513,7 @@ public class NPC extends EntityHuman {
         return getTargets(s[0], s.length < 2 ? 0 : Double.parseDouble(s[2]), s.length < 3 ? this.getHaterange() : Integer.parseInt(s[2]), s.length < 4 ? this.level.getEntities().length : Integer.parseInt(s[3]), null);
     }
 
-    public List<Entity> getTargets(String type,double figure,double distance, int amountlimit, List<String> creaturetype) {
+    public List<Entity> getTargets(String type, double figure, double distance, int amountlimit, List<String> creaturetype) {
         List<Entity> entities = new ArrayList<>();
         for (Entity entity : getLevel().getEntities()) {
             if (entity.distance(this) <= distance) {
@@ -622,18 +580,18 @@ public class NPC extends EntityHuman {
                 }
                 break;
             }
-            case "distance":{
-                for (Entity entity:this.getLevel().getEntities()){
-                    if (entity.distance(this)<=distance){
-                        if (entity!=this) {
+            case "distance": {
+                for (Entity entity : this.getLevel().getEntities()) {
+                    if (entity.distance(this) <= distance) {
+                        if (entity != this) {
                             entities.add(entity);
                         }
                     }
                 }
                 break;
             }
-            case "hate":{
-                for (Entity entity:entities) {
+            case "hate": {
+                for (Entity entity : entities) {
                     if (this.getHatePool().containsKey(entity)) {
                         if (this.getHatePool().get(entity) >= figure) {
                             entities.add(entity);
@@ -642,17 +600,17 @@ public class NPC extends EntityHuman {
                 }
                 break;
             }
-            case "damage":{
-                for (Entity entity:entities) {
+            case "damage": {
+                for (Entity entity : entities) {
                     if (this.getDamagePool().containsKey(entity)) {
                         if (this.getDamagePool().get(entity) >= figure) {
                             entities.add(entity);
                         }
                     }
                     if (creaturetype != null) {
-                        removeUnattractiveCreature(entities,creaturetype);
+                        removeUnattractiveCreature(entities, creaturetype);
                     } else {
-                        removeUnattractiveCreature(entities,activeattackcreature);
+                        removeUnattractiveCreature(entities, activeattackcreature);
                     }
                 }
                 break;
@@ -669,6 +627,7 @@ public class NPC extends EntityHuman {
         }
         return entities;
     }
+
     public void removeUnattractiveCreature(List<Entity> entities, List<String> unattractiveCreature) {
         for (Entity entity : entities) {
             if (unattractiveCreature != null) {
@@ -718,18 +677,18 @@ public class NPC extends EntityHuman {
                                     break;
                                 }
                                 case "MDungeon": {
-                                    if (getServer().getPluginManager().getPlugin("MDungeon")!=null) {
+                                    if (getServer().getPluginManager().getPlugin("MDungeon") != null) {
                                         if (this.mobFeature.split(":")[0].equals("MDungeon")) {
                                             Long roomid = Long.valueOf(this.mobFeature.split(":")[this.mobFeature.split(":").length - 1]);
-                                            if (entity instanceof Player){
-                                                if (DataPacketLimit.limitPlayers.containsKey(entity.getId())){
-                                                    if (DataPacketLimit.limitPlayers.get(entity.getId())!=roomid){
+                                            if (entity instanceof Player) {
+                                                if (DataPacketLimit.limitPlayers.containsKey(entity.getId())) {
+                                                    if (DataPacketLimit.limitPlayers.get(entity.getId()) != roomid) {
                                                         canBeChoose = false;
                                                     }
                                                 }
-                                            }else{
-                                                if (DataPacketLimit.limitEntities.containsKey(entity.getId())){
-                                                    if (DataPacketLimit.limitEntities.get(entity.getId())!=roomid){
+                                            } else {
+                                                if (DataPacketLimit.limitEntities.containsKey(entity.getId())) {
+                                                    if (DataPacketLimit.limitEntities.get(entity.getId()) != roomid) {
                                                         canBeChoose = false;
                                                     }
                                                 }
@@ -739,23 +698,23 @@ public class NPC extends EntityHuman {
                                     break;
                                 }
                                 case "NotMDungeon": {
-                                    if (getServer().getPluginManager().getPlugin("MDungeon")!=null) {
+                                    if (getServer().getPluginManager().getPlugin("MDungeon") != null) {
                                         if (this.mobFeature.split(":")[0].equals("MDungeon")) {
                                             Long roomid = Long.valueOf(this.mobFeature.split(":")[this.mobFeature.split(":").length - 1]);
-                                            if (entity instanceof Player){
-                                                if (DataPacketLimit.limitPlayers.containsKey(entity.getId())){
-                                                    if (DataPacketLimit.limitPlayers.get(entity.getId())==roomid){
+                                            if (entity instanceof Player) {
+                                                if (DataPacketLimit.limitPlayers.containsKey(entity.getId())) {
+                                                    if (DataPacketLimit.limitPlayers.get(entity.getId()) == roomid) {
                                                         canBeChoose = false;
                                                     }
-                                                }else{
+                                                } else {
                                                     canBeChoose = false;
                                                 }
-                                            }else{
-                                                if (DataPacketLimit.limitEntities.containsKey(entity.getId())){
-                                                    if (DataPacketLimit.limitEntities.get(entity.getId())==roomid){
+                                            } else {
+                                                if (DataPacketLimit.limitEntities.containsKey(entity.getId())) {
+                                                    if (DataPacketLimit.limitEntities.get(entity.getId()) == roomid) {
                                                         canBeChoose = false;
                                                     }
-                                                }else{
+                                                } else {
                                                     canBeChoose = false;
                                                 }
                                             }
@@ -806,18 +765,18 @@ public class NPC extends EntityHuman {
                                 break;
                             }
                             case "MDungeon": {
-                                if (getServer().getPluginManager().getPlugin("MDungeon")!=null) {
+                                if (getServer().getPluginManager().getPlugin("MDungeon") != null) {
                                     if (this.mobFeature.split(":")[0].equals("MDungeon")) {
                                         Long roomid = Long.valueOf(this.mobFeature.split(":")[this.mobFeature.split(":").length - 1]);
-                                        if (entity instanceof Player){
-                                            if (DataPacketLimit.limitPlayers.containsKey(entity.getId())){
-                                                if (DataPacketLimit.limitPlayers.get(entity.getId())==roomid){
+                                        if (entity instanceof Player) {
+                                            if (DataPacketLimit.limitPlayers.containsKey(entity.getId())) {
+                                                if (DataPacketLimit.limitPlayers.get(entity.getId()) == roomid) {
                                                     entities.remove(entity);
                                                 }
                                             }
-                                        }else{
-                                            if (DataPacketLimit.limitEntities.containsKey(entity.getId())){
-                                                if (DataPacketLimit.limitEntities.get(entity.getId())==roomid){
+                                        } else {
+                                            if (DataPacketLimit.limitEntities.containsKey(entity.getId())) {
+                                                if (DataPacketLimit.limitEntities.get(entity.getId()) == roomid) {
                                                     entities.remove(entity);
                                                 }
                                             }
@@ -827,23 +786,23 @@ public class NPC extends EntityHuman {
                                 break;
                             }
                             case "NotMDungeon": {
-                                if (getServer().getPluginManager().getPlugin("MDungeon")!=null) {
+                                if (getServer().getPluginManager().getPlugin("MDungeon") != null) {
                                     if (this.mobFeature.split(":")[0].equals("MDungeon")) {
                                         Long roomid = Long.valueOf(this.mobFeature.split(":")[this.mobFeature.split(":").length - 1]);
-                                        if (entity instanceof Player){
-                                            if (DataPacketLimit.limitPlayers.containsKey(entity.getId())){
-                                                if (DataPacketLimit.limitPlayers.get(entity.getId())!=roomid){
+                                        if (entity instanceof Player) {
+                                            if (DataPacketLimit.limitPlayers.containsKey(entity.getId())) {
+                                                if (DataPacketLimit.limitPlayers.get(entity.getId()) != roomid) {
                                                     entities.remove(entity);
                                                 }
-                                            }else{
+                                            } else {
                                                 entities.remove(entity);
                                             }
-                                        }else{
-                                            if (DataPacketLimit.limitEntities.containsKey(entity.getId())){
-                                                if (DataPacketLimit.limitEntities.get(entity.getId())!=roomid){
+                                        } else {
+                                            if (DataPacketLimit.limitEntities.containsKey(entity.getId())) {
+                                                if (DataPacketLimit.limitEntities.get(entity.getId()) != roomid) {
                                                     entities.remove(entity);
                                                 }
-                                            }else{
+                                            } else {
                                                 entities.remove(entity);
                                             }
                                         }
@@ -857,6 +816,7 @@ public class NPC extends EntityHuman {
             }
         }
     }
+
     public void removeUnattractiveCreature(ConcurrentHashMap<Entity, Float> map, List<String> unattractiveCreature) {
         for (Entity entity : map.keySet()) {
             if (unattractiveCreature != null) {
@@ -906,18 +866,18 @@ public class NPC extends EntityHuman {
                                     break;
                                 }
                                 case "MDungeon": {
-                                    if (getServer().getPluginManager().getPlugin("MDungeon")!=null) {
+                                    if (getServer().getPluginManager().getPlugin("MDungeon") != null) {
                                         if (this.mobFeature.split(":")[0].equals("MDungeon")) {
                                             Long roomid = Long.valueOf(this.mobFeature.split(":")[this.mobFeature.split(":").length - 1]);
-                                            if (entity instanceof Player){
-                                                if (DataPacketLimit.limitPlayers.containsKey(entity.getId())){
-                                                    if (DataPacketLimit.limitPlayers.get(entity.getId())!=roomid){
+                                            if (entity instanceof Player) {
+                                                if (DataPacketLimit.limitPlayers.containsKey(entity.getId())) {
+                                                    if (DataPacketLimit.limitPlayers.get(entity.getId()) != roomid) {
                                                         canBeChoose = false;
                                                     }
                                                 }
-                                            }else{
-                                                if (DataPacketLimit.limitEntities.containsKey(entity.getId())){
-                                                    if (DataPacketLimit.limitEntities.get(entity.getId())!=roomid){
+                                            } else {
+                                                if (DataPacketLimit.limitEntities.containsKey(entity.getId())) {
+                                                    if (DataPacketLimit.limitEntities.get(entity.getId()) != roomid) {
                                                         canBeChoose = false;
                                                     }
                                                 }
@@ -927,23 +887,23 @@ public class NPC extends EntityHuman {
                                     break;
                                 }
                                 case "NotMDungeon": {
-                                    if (getServer().getPluginManager().getPlugin("MDungeon")!=null) {
+                                    if (getServer().getPluginManager().getPlugin("MDungeon") != null) {
                                         if (this.mobFeature.split(":")[0].equals("MDungeon")) {
                                             Long roomid = Long.valueOf(this.mobFeature.split(":")[this.mobFeature.split(":").length - 1]);
-                                            if (entity instanceof Player){
-                                                if (DataPacketLimit.limitPlayers.containsKey(entity.getId())){
-                                                    if (DataPacketLimit.limitPlayers.get(entity.getId())!=roomid){
+                                            if (entity instanceof Player) {
+                                                if (DataPacketLimit.limitPlayers.containsKey(entity.getId())) {
+                                                    if (DataPacketLimit.limitPlayers.get(entity.getId()) != roomid) {
                                                         map.remove(entity);
                                                     }
-                                                }else{
+                                                } else {
                                                     map.remove(entity);
                                                 }
-                                            }else{
-                                                if (DataPacketLimit.limitEntities.containsKey(entity.getId())){
-                                                    if (DataPacketLimit.limitEntities.get(entity.getId())!=roomid){
+                                            } else {
+                                                if (DataPacketLimit.limitEntities.containsKey(entity.getId())) {
+                                                    if (DataPacketLimit.limitEntities.get(entity.getId()) != roomid) {
                                                         map.remove(entity);
                                                     }
-                                                }else{
+                                                } else {
                                                     map.remove(entity);
                                                 }
                                             }
@@ -994,18 +954,18 @@ public class NPC extends EntityHuman {
                                 break;
                             }
                             case "MDungeon": {
-                                if (getServer().getPluginManager().getPlugin("MDungeon")!=null) {
+                                if (getServer().getPluginManager().getPlugin("MDungeon") != null) {
                                     if (this.mobFeature.split(":")[0].equals("MDungeon")) {
                                         Long roomid = Long.valueOf(this.mobFeature.split(":")[this.mobFeature.split(":").length - 1]);
-                                        if (entity instanceof Player){
-                                            if (DataPacketLimit.limitPlayers.containsKey(entity.getId())){
-                                                if (DataPacketLimit.limitPlayers.get(entity.getId())==roomid){
+                                        if (entity instanceof Player) {
+                                            if (DataPacketLimit.limitPlayers.containsKey(entity.getId())) {
+                                                if (DataPacketLimit.limitPlayers.get(entity.getId()) == roomid) {
                                                     map.remove(entity);
                                                 }
                                             }
-                                        }else{
-                                            if (DataPacketLimit.limitEntities.containsKey(entity.getId())){
-                                                if (DataPacketLimit.limitEntities.get(entity.getId())==roomid){
+                                        } else {
+                                            if (DataPacketLimit.limitEntities.containsKey(entity.getId())) {
+                                                if (DataPacketLimit.limitEntities.get(entity.getId()) == roomid) {
                                                     map.remove(entity);
                                                 }
                                             }
@@ -1015,23 +975,23 @@ public class NPC extends EntityHuman {
                                 break;
                             }
                             case "NotMDungeon": {
-                                if (getServer().getPluginManager().getPlugin("MDungeon")!=null) {
+                                if (getServer().getPluginManager().getPlugin("MDungeon") != null) {
                                     if (this.mobFeature.split(":")[0].equals("MDungeon")) {
                                         Long roomid = Long.valueOf(this.mobFeature.split(":")[this.mobFeature.split(":").length - 1]);
-                                        if (entity instanceof Player){
-                                            if (DataPacketLimit.limitPlayers.containsKey(entity.getId())){
-                                                if (DataPacketLimit.limitPlayers.get(entity.getId())!=roomid){
+                                        if (entity instanceof Player) {
+                                            if (DataPacketLimit.limitPlayers.containsKey(entity.getId())) {
+                                                if (DataPacketLimit.limitPlayers.get(entity.getId()) != roomid) {
                                                     map.remove(entity);
                                                 }
-                                            }else{
+                                            } else {
                                                 map.remove(entity);
                                             }
-                                        }else{
-                                            if (DataPacketLimit.limitEntities.containsKey(entity.getId())){
-                                                if (DataPacketLimit.limitEntities.get(entity.getId())!=roomid){
+                                        } else {
+                                            if (DataPacketLimit.limitEntities.containsKey(entity.getId())) {
+                                                if (DataPacketLimit.limitEntities.get(entity.getId()) != roomid) {
                                                     map.remove(entity);
                                                 }
-                                            }else{
+                                            } else {
                                                 map.remove(entity);
                                             }
                                         }
@@ -1094,18 +1054,18 @@ public class NPC extends EntityHuman {
                                 break;
                             }
                             case "MDungeon": {
-                                if (getServer().getPluginManager().getPlugin("MDungeon")!=null) {
+                                if (getServer().getPluginManager().getPlugin("MDungeon") != null) {
                                     if (this.mobFeature.split(":")[0].equals("MDungeon")) {
                                         Long roomid = Long.valueOf(this.mobFeature.split(":")[this.mobFeature.split(":").length - 1]);
-                                        if (entity instanceof Player){
-                                            if (DataPacketLimit.limitPlayers.containsKey(entity.getId())){
-                                                if (DataPacketLimit.limitPlayers.get(entity.getId())!=roomid){
+                                        if (entity instanceof Player) {
+                                            if (DataPacketLimit.limitPlayers.containsKey(entity.getId())) {
+                                                if (DataPacketLimit.limitPlayers.get(entity.getId()) != roomid) {
                                                     canBeChoose = false;
                                                 }
                                             }
-                                        }else{
-                                            if (DataPacketLimit.limitEntities.containsKey(entity.getId())){
-                                                if (DataPacketLimit.limitEntities.get(entity.getId())!=roomid){
+                                        } else {
+                                            if (DataPacketLimit.limitEntities.containsKey(entity.getId())) {
+                                                if (DataPacketLimit.limitEntities.get(entity.getId()) != roomid) {
                                                     canBeChoose = false;
                                                 }
                                             }
@@ -1115,18 +1075,18 @@ public class NPC extends EntityHuman {
                                 break;
                             }
                             case "NotMDungeon": {
-                                if (getServer().getPluginManager().getPlugin("MDungeon")!=null) {
+                                if (getServer().getPluginManager().getPlugin("MDungeon") != null) {
                                     if (this.mobFeature.split(":")[0].equals("MDungeon")) {
                                         Long roomid = Long.valueOf(this.mobFeature.split(":")[this.mobFeature.split(":").length - 1]);
-                                        if (entity instanceof Player){
-                                            if (DataPacketLimit.limitPlayers.containsKey(entity.getId())){
-                                                if (DataPacketLimit.limitPlayers.get(entity.getId())==roomid){
+                                        if (entity instanceof Player) {
+                                            if (DataPacketLimit.limitPlayers.containsKey(entity.getId())) {
+                                                if (DataPacketLimit.limitPlayers.get(entity.getId()) == roomid) {
                                                     canBeChoose = false;
                                                 }
                                             }
-                                        }else{
-                                            if (DataPacketLimit.limitEntities.containsKey(entity.getId())){
-                                                if (DataPacketLimit.limitEntities.get(entity.getId())==roomid){
+                                        } else {
+                                            if (DataPacketLimit.limitEntities.containsKey(entity.getId())) {
+                                                if (DataPacketLimit.limitEntities.get(entity.getId()) == roomid) {
                                                     canBeChoose = false;
                                                 }
                                             }
@@ -1184,18 +1144,18 @@ public class NPC extends EntityHuman {
                             break;
                         }
                         case "MDungeon": {
-                            if (getServer().getPluginManager().getPlugin("MDungeon")!=null) {
+                            if (getServer().getPluginManager().getPlugin("MDungeon") != null) {
                                 if (this.mobFeature.split(":")[0].equals("MDungeon")) {
                                     Long roomid = Long.valueOf(this.mobFeature.split(":")[this.mobFeature.split(":").length - 1]);
-                                    if (entity instanceof Player){
-                                        if (DataPacketLimit.limitPlayers.containsKey(entity.getId())){
-                                            if (DataPacketLimit.limitPlayers.get(entity.getId())==roomid){
+                                    if (entity instanceof Player) {
+                                        if (DataPacketLimit.limitPlayers.containsKey(entity.getId())) {
+                                            if (DataPacketLimit.limitPlayers.get(entity.getId()) == roomid) {
                                                 entities.add(entity);
                                             }
                                         }
-                                    }else{
-                                        if (DataPacketLimit.limitEntities.containsKey(entity.getId())){
-                                            if (DataPacketLimit.limitEntities.get(entity.getId())==roomid){
+                                    } else {
+                                        if (DataPacketLimit.limitEntities.containsKey(entity.getId())) {
+                                            if (DataPacketLimit.limitEntities.get(entity.getId()) == roomid) {
                                                 entities.add(entity);
                                             }
                                         }
@@ -1205,18 +1165,18 @@ public class NPC extends EntityHuman {
                             break;
                         }
                         case "NotMDungeon": {
-                            if (getServer().getPluginManager().getPlugin("MDungeon")!=null) {
+                            if (getServer().getPluginManager().getPlugin("MDungeon") != null) {
                                 if (this.mobFeature.split(":")[0].equals("MDungeon")) {
                                     Long roomid = Long.valueOf(this.mobFeature.split(":")[this.mobFeature.split(":").length - 1]);
-                                    if (entity instanceof Player){
-                                        if (DataPacketLimit.limitPlayers.containsKey(entity.getId())){
-                                            if (DataPacketLimit.limitPlayers.get(entity.getId())!=roomid){
+                                    if (entity instanceof Player) {
+                                        if (DataPacketLimit.limitPlayers.containsKey(entity.getId())) {
+                                            if (DataPacketLimit.limitPlayers.get(entity.getId()) != roomid) {
                                                 entities.add(entity);
                                             }
                                         }
-                                    }else{
-                                        if (DataPacketLimit.limitEntities.containsKey(entity.getId())){
-                                            if (DataPacketLimit.limitEntities.get(entity.getId())!=roomid){
+                                    } else {
+                                        if (DataPacketLimit.limitEntities.containsKey(entity.getId())) {
+                                            if (DataPacketLimit.limitEntities.get(entity.getId()) != roomid) {
                                                 entities.add(entity);
                                             }
                                         }
@@ -1233,13 +1193,12 @@ public class NPC extends EntityHuman {
 
     //Setting method
 
+    public String getCamp() {
+        return camp;
+    }
 
     public void setCamp(String camp) {
         this.camp = camp;
-    }
-
-    public String getCamp() {
-        return camp;
     }
 
     public void setSpeed(double speed) {
@@ -1254,36 +1213,36 @@ public class NPC extends EntityHuman {
         this.attackrange = attackrange;
     }
 
-    public void setBeDamagedblockparticle(String beattackblockparticle) {
-        this.bedamagedblockparticle = beattackblockparticle;
-    }
-
     public String getBeDamagedblockparticle() {
         return bedamagedblockparticle;
     }
 
-    public void setBedamageddelay(int bedamageddelay) {
-        this.bedamageddelay = bedamageddelay;
+    public void setBeDamagedblockparticle(String beattackblockparticle) {
+        this.bedamagedblockparticle = beattackblockparticle;
     }
 
     public int getBedamageddelay() {
         return bedamageddelay;
     }
 
-    public void setBedamageCD(ConcurrentHashMap<Entity, Integer> bedamageCD) {
-        this.bedamageCD = bedamageCD;
+    public void setBedamageddelay(int bedamageddelay) {
+        this.bedamageddelay = bedamageddelay;
     }
 
     public ConcurrentHashMap<Entity, Integer> getBedamageCD() {
         return bedamageCD;
     }
 
-    public void setCanbeknockback(boolean canbeknockback) {
-        this.canbeknockback = canbeknockback;
+    public void setBedamageCD(ConcurrentHashMap<Entity, Integer> bedamageCD) {
+        this.bedamageCD = bedamageCD;
     }
 
     public boolean getCanbeknockback() {
         return canbeknockback;
+    }
+
+    public void setCanbeknockback(boolean canbeknockback) {
+        this.canbeknockback = canbeknockback;
     }
 
     public void setDamage(double damage) {
@@ -1294,52 +1253,48 @@ public class NPC extends EntityHuman {
         this.damagedelay = damagedelay;
     }
 
-    public void setDamagePool(ConcurrentHashMap<Entity, Float> damagePool) {
-        this.damagePool = damagePool;
-    }
-
     public ConcurrentHashMap<Entity, Float> getDamagePool() {
         return damagePool;
     }
 
-    public void setHatePool(ConcurrentHashMap<Entity, Float> hatePool) {
-        this.hatePool = hatePool;
+    public void setDamagePool(ConcurrentHashMap<Entity, Float> damagePool) {
+        this.damagePool = damagePool;
     }
 
     public ConcurrentHashMap<Entity, Float> getHatePool() {
         return hatePool;
     }
 
-    public void setDeathcommands(List<String> deathcommands) {
-        this.deathcommands = deathcommands;
+    public void setHatePool(ConcurrentHashMap<Entity, Float> hatePool) {
+        this.hatePool = hatePool;
     }
 
     public List<String> getDeathcommands() {
         return deathcommands;
     }
 
-    public void setDefenseformula(String defenseformula) {
-        this.defenseformula = defenseformula;
+    public void setDeathcommands(List<String> deathcommands) {
+        this.deathcommands = deathcommands;
     }
 
     public String getDefenseformula() {
         return defenseformula;
     }
 
+    public void setDefenseformula(String defenseformula) {
+        this.defenseformula = defenseformula;
+    }
+
     public void setDisplayName(String displayName) {
         this.displayName = displayName;
     }
 
-    public void setDrops(List<String> drops) {
-        this.drops = drops;
+    public double getHaterange() {
+        return haterange;
     }
 
     public void setHaterange(double haterange) {
         this.haterange = haterange;
-    }
-
-    public double getHaterange() {
-        return haterange;
     }
 
     public void setNohatesheal(String nohatesheal) {
@@ -1350,20 +1305,20 @@ public class NPC extends EntityHuman {
         this.knockback = knockback;
     }
 
-    public void setSkinname(String skinname) {
-        this.skinname = skinname;
-    }
-
     public String getSkinname() {
         return skinname;
     }
 
-    public void setActiveattackcreature(List<String> activeattackcreature) {
-        this.activeattackcreature = activeattackcreature;
+    public void setSkinname(String skinname) {
+        this.skinname = skinname;
     }
 
     public List<String> getActiveattackcreature() {
         return activeattackcreature;
+    }
+
+    public void setActiveattackcreature(List<String> activeattackcreature) {
+        this.activeattackcreature = activeattackcreature;
     }
 
     public List<String> getUnattractivecreature() {
@@ -1378,12 +1333,12 @@ public class NPC extends EntityHuman {
         this.hitrange = hitrange;
     }
 
-    public void setMobFeature(String mobPoint) {
-        this.mobFeature = mobPoint;
-    }
-
     public String getMobFeature() {
         return mobFeature;
+    }
+
+    public void setMobFeature(String mobPoint) {
+        this.mobFeature = mobPoint;
     }
 
     public boolean isAttacking() {
@@ -1409,38 +1364,6 @@ public class NPC extends EntityHuman {
     public void setSkills(List<String> skills) {
         this.skills = skills;
     }
-/*
-    @Override
-    public void spawnToAll() {
-        if (this.chunk != null && !this.closed) {
-            Iterator var1 = this.level.getChunkPlayers(this.chunk.getX(), this.chunk.getZ()).values().iterator();
-            while(var1.hasNext()) {
-                Player player = (Player)var1.next();
-                if (player.isOnline()) {
-                    this.spawnTo(player);
-                }
-            }
-        }
-    }
-
-    public void spawnTo(Player player) {
-        if (!this.hasSpawned.containsKey(player.getLoaderId()) && this.chunk != null && player.usedChunks.containsKey(Level.chunkHash(this.chunk.getX(), this.chunk.getZ()))) {
-            this.hasSpawned.put(player.getLoaderId(), player);
-            player.dataPacket(this.createAddEntityPacket());
-        }
-
-        if (this.riding != null) {
-            this.riding.spawnTo(player);
-            SetEntityLinkPacket pkk = new SetEntityLinkPacket();
-            pkk.vehicleUniqueId = this.riding.getId();
-            pkk.riderUniqueId = this.getId();
-            pkk.type = 1;
-            pkk.immediate = 1;
-            player.dataPacket(pkk);
-        }
-    }
-
- */
 
     //attack method
     public void attackEntity(Entity target) {
@@ -1452,7 +1375,7 @@ public class NPC extends EntityHuman {
             }
         }
         if (this.attackdelayed >= this.attackdelay) {
-            if (distance(target)/target.scale <= this.attackrange) {
+            if (distance(target) / target.scale <= this.attackrange) {
                 Position position = target.getPosition().clone();
                 float knockback = (float) this.knockback;
                 HashMap<EntityDamageEvent.DamageModifier, Float> damage = new HashMap<>();
@@ -1503,7 +1426,38 @@ public class NPC extends EntityHuman {
             }
         }
     }
+/*
+    @Override
+    public void spawnToAll() {
+        if (this.chunk != null && !this.closed) {
+            Iterator var1 = this.level.getChunkPlayers(this.chunk.getX(), this.chunk.getZ()).values().iterator();
+            while(var1.hasNext()) {
+                Player player = (Player)var1.next();
+                if (player.isOnline()) {
+                    this.spawnTo(player);
+                }
+            }
+        }
+    }
 
+    public void spawnTo(Player player) {
+        if (!this.hasSpawned.containsKey(player.getLoaderId()) && this.chunk != null && player.usedChunks.containsKey(Level.chunkHash(this.chunk.getX(), this.chunk.getZ()))) {
+            this.hasSpawned.put(player.getLoaderId(), player);
+            player.dataPacket(this.createAddEntityPacket());
+        }
+
+        if (this.riding != null) {
+            this.riding.spawnTo(player);
+            SetEntityLinkPacket pkk = new SetEntityLinkPacket();
+            pkk.vehicleUniqueId = this.riding.getId();
+            pkk.riderUniqueId = this.getId();
+            pkk.type = 1;
+            pkk.immediate = 1;
+            player.dataPacket(pkk);
+        }
+    }
+
+ */
 
     public void broadcastEntityEvent(int eventId) {
         broadcastEntityEvent(eventId, 0);
@@ -1555,6 +1509,10 @@ public class NPC extends EntityHuman {
     @Override
     public Item[] getDrops() {
         return new Item[0];
+    }
+
+    public void setDrops(List<String> drops) {
+        this.drops = drops;
     }
 
     public void Drop() {
@@ -1666,6 +1624,7 @@ public class NPC extends EntityHuman {
 
         return s;
     }
+
     public void spawnTo(Player player) {
         if (player.isLoaderActive()) {
             if (Long.valueOf(this.getId()) == null) {

@@ -10,10 +10,8 @@ import cn.nukkit.entity.item.EntityItem;
 import cn.nukkit.item.Item;
 import cn.nukkit.level.Level;
 import cn.nukkit.level.Location;
-import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.plugin.PluginBase;
 import cn.nukkit.utils.Config;
-import com.google.gson.internal.LinkedTreeMap;
 import com.muffinhead.MRPGNPC.Events.MobNPCBeAttack;
 import com.muffinhead.MRPGNPC.NPCs.MobNPC;
 import com.muffinhead.MRPGNPC.NPCs.NPC;
@@ -23,14 +21,12 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
-
-import static cn.nukkit.utils.Utils.readFile;
 
 public class MRPGNPC extends PluginBase {
     public static MRPGNPC mrpgnpc;
@@ -43,18 +39,18 @@ public class MRPGNPC extends PluginBase {
 
     @Override
     public void onLoad() {
-        Entity.registerEntity("MobNPC",MobNPC.class);
+        Entity.registerEntity("MobNPC", MobNPC.class);
     }
 
     @Override
     public void onEnable() {
         getServer().getLogger().info("MRPGNPC is enable!The author is MuffinHead.");
-        getServer().getPluginManager().registerEvents(new MobNPCBeAttack(),this);
+        getServer().getPluginManager().registerEvents(new MobNPCBeAttack(), this);
         mrpgnpc = this;
         checkMobs();
         checkPoints();
         checkSkills();
-        getServer().getScheduler().scheduleDelayedRepeatingTask(new AutoSpawn(),1,1);
+        getServer().getScheduler().scheduleDelayedRepeatingTask(new AutoSpawn(), 1, 1);
         try {
             checkSkins();
         } catch (IOException e) {
@@ -64,9 +60,9 @@ public class MRPGNPC extends PluginBase {
 
     @Override
     public void onDisable() {
-        for (Level level :getServer().getLevels().values()){
-            for (Entity entity:level.getEntities()){
-                if (entity instanceof MobNPC){
+        for (Level level : getServer().getLevels().values()) {
+            for (Entity entity : level.getEntities()) {
+                if (entity instanceof MobNPC) {
                     entity.kill();
                 }
             }
@@ -79,12 +75,12 @@ public class MRPGNPC extends PluginBase {
         if (command.getName().equalsIgnoreCase("mrn")) {
             if (args.length <= 0) return false;
             switch (args[0]) {
-                case "clear":{
+                case "clear": {
                     if (args.length <= 1) return false;
                     switch (args[1]) {
-                        case "mobs":{
-                            for (Level level:getServer().getLevels().values()){
-                                for (Entity entity:level.getEntities()){
+                        case "mobs": {
+                            for (Level level : getServer().getLevels().values()) {
+                                for (Entity entity : level.getEntities()) {
                                     if (entity instanceof MobNPC) {
                                         entity.kill();
                                     }
@@ -92,8 +88,8 @@ public class MRPGNPC extends PluginBase {
                             }
                         }
                         case "drops": {
-                            for (Level level:getServer().getLevels().values()){
-                                for (Entity entity:level.getEntities()){
+                            for (Level level : getServer().getLevels().values()) {
+                                for (Entity entity : level.getEntities()) {
                                     if (entity instanceof EntityItem) {
                                         entity.kill();
                                     }
@@ -133,7 +129,7 @@ public class MRPGNPC extends PluginBase {
                         }
                         case "spawn": {
                             NPC npc = spawnNPC(sender, args);
-                            if (npc!=null){
+                            if (npc != null) {
                                 npc.spawnToAll();
                             }
                             return true;
@@ -185,11 +181,11 @@ public class MRPGNPC extends PluginBase {
                         }
                     }
                 }
-                case "reload":{
+                case "reload": {
                     checkMobs();
                     checkPoints();
                     checkSkills();
-                    getServer().getScheduler().scheduleDelayedRepeatingTask(new AutoSpawn(),1,1);
+                    getServer().getScheduler().scheduleDelayedRepeatingTask(new AutoSpawn(), 1, 1);
                     try {
                         checkSkins();
                     } catch (IOException e) {
@@ -201,8 +197,8 @@ public class MRPGNPC extends PluginBase {
 
                 //put on the back burner
                 case "skill": {
-                    switch (args[1]){
-                        case "create":{
+                    switch (args[1]) {
+                        case "create": {
                             if (args.length >= 3) {
                                 File skillFile = getSkillFolder().resolve(args[2] + ".yml").toFile();
                                 if (skillFile.exists()) {
@@ -249,31 +245,31 @@ public class MRPGNPC extends PluginBase {
         config.set("DamageDelay", 0);
         config.set("BedamagedDelay", 0);
         config.set("AttackRange", 1.2);
-        config.set("HitRange",0.15);
+        config.set("HitRange", 0.15);
         config.set("HateRange", 15.0);
-        config.set("HitRange",0.15);
+        config.set("HitRange", 0.15);
         config.set("NoHatesHeal", "200:1.0");
         config.set("CanBeKnockBack", false);
-        config.set("BoudningBox",true);
+        config.set("BoudningBox", true);
         config.set("DeathCommands", new ArrayList<>());
         config.set("Skin", "GreenCross");
         config.set("ItemInHand", "267:0");
         config.set("BeDamagedBlockParticleID", "152:0");
-        config.set("ActiveAttackCreature",new ArrayList<>());
-        config.set("UnattractiveCreature",new ArrayList<>());
+        config.set("ActiveAttackCreature", new ArrayList<>());
+        config.set("UnattractiveCreature", new ArrayList<>());
         config.set("Drops", new ArrayList<>());
         config.set("Camp", "Example");
-        config.set("Skills",new ArrayList<>());
+        config.set("Skills", new ArrayList<>());
         return config;
     }
 
     /*
     mobfilename-respawntick-1timespawnamount-maxamount-spawnlimit
      */
-    public Config createPointConfig(String configPath,Player player) {
+    public Config createPointConfig(String configPath, Player player) {
         Config config = new Config(configPath, Config.YAML);
         config.set("PointName", "A");
-        config.set("PointPosition",player.getX()+":"+player.getY()+":"+player.getZ()+":"+player.getLevel().getName()+":"+player.getYaw()+":"+player.getPitch());
+        config.set("PointPosition", player.getX() + ":" + player.getY() + ":" + player.getZ() + ":" + player.getLevel().getName() + ":" + player.getYaw() + ":" + player.getPitch());
         config.set("SpawnList", new ArrayList<>());
         return config;
     }
@@ -283,6 +279,7 @@ public class MRPGNPC extends PluginBase {
         config.set("Skills", new ArrayList<>());
         return config;
     }
+
     public MobNPC spawnNPC(CommandSender sender, String mobfile, Location location, String mobFeature) {
         String[] args = new String[9];
         args[0] = "";
@@ -294,7 +291,7 @@ public class MRPGNPC extends PluginBase {
         args[6] = location.getLevel().getName();
         args[7] = String.valueOf(location.getYaw());
         args[8] = String.valueOf(location.getPitch());
-        MobNPC npc = spawnNPC(sender,args);
+        MobNPC npc = spawnNPC(sender, args);
         npc.setMobFeature(mobFeature);
         return npc;
     }
@@ -304,9 +301,9 @@ public class MRPGNPC extends PluginBase {
             if (!(sender instanceof Player)) {
                 sender.sendMessage("The console need type the coordinates");
                 return null;
-            }else{
+            } else {
                 Config config = mobconfigs.get(args[2]);
-                if (config!=null) {
+                if (config != null) {
                     MobNPC npc = new MobNPC(((Player) sender).getChunk(), NPC.getDefaultNBT(((Player) sender).getTargetBlock(3)));
                     npc.setDisplayName(config.getString("DisplayName"));
                     npc.setMaxHealth(config.getInt("MaxHealth"));
@@ -338,10 +335,10 @@ public class MRPGNPC extends PluginBase {
                     return npc;
                 }
             }
-        }else{
+        } else {
             Config config = mobconfigs.get(args[2]);
-            if (config!=null) {
-                Location location = new Location(Double.parseDouble(args[3]), Double.parseDouble(args[4]), Double.parseDouble(args[5]),Double.parseDouble(args[7]),Double.parseDouble(args[8]),getServer().getLevelByName(args[6]));
+            if (config != null) {
+                Location location = new Location(Double.parseDouble(args[3]), Double.parseDouble(args[4]), Double.parseDouble(args[5]), Double.parseDouble(args[7]), Double.parseDouble(args[8]), getServer().getLevelByName(args[6]));
                 MobNPC npc = new MobNPC(location.getChunk(), NPC.getDefaultNBT(location));
                 npc.setDisplayName(config.getString("DisplayName"));
                 npc.setMaxHealth(config.getInt("MaxHealth"));
@@ -377,11 +374,12 @@ public class MRPGNPC extends PluginBase {
     }
 
 
-    public Item getItemByString(String s){
+    public Item getItemByString(String s) {
         Item item = Item.get(Integer.parseInt(s.split(":")[0]));
         item.setDamage(Integer.parseInt(s.split(":")[1]));
         return item;
     }
+
     public void checkSkins() throws IOException {
         Path skinPath = getDataFolder().toPath().resolve("Skins");
         File skinsFolder = new File(skinPath.toString());
@@ -404,17 +402,19 @@ public class MRPGNPC extends PluginBase {
             skins.put(skinFolder.getName(), skin);
         }
     }
+
     public Skin newSkin(Path path) throws IOException {
         Skin skin = new Skin();
         skin.generateSkinId("jpm");
-        skin.setGeometryName(path.toString()+"/geometry.jpm");
+        skin.setGeometryName(path.toString() + "/geometry.jpm");
         skin.setSkinResourcePatch("{\"geometry\":{\"default\":\"geometry.jpm\"}}");
         skin.setGeometryData(new String(Files.readAllBytes(Paths.get(path.toString() + "/geometry.json"))));
         skin.setSkinData(ImageIO.read(Paths.get(path.toString() + "/skin.png").toFile()));
         skin.setTrusted(true);
         return skin;
     }
-    public void checkMobs(){
+
+    public void checkMobs() {
         File mobsFolder = getMobFolder().toFile();
         if (!mobsFolder.exists()) {
             mobsFolder.mkdirs();
@@ -424,7 +424,8 @@ public class MRPGNPC extends PluginBase {
             mobconfigs.put(mobfile.getName().replace(".yml", ""), config);
         }
     }
-    public void checkPoints(){
+
+    public void checkPoints() {
         File pointsFolder = getPointFolder().toFile();
         if (!pointsFolder.exists()) {
             pointsFolder.mkdirs();
@@ -434,7 +435,8 @@ public class MRPGNPC extends PluginBase {
             pointconfigs.put(pointfile.getName().replace(".yml", ""), config);
         }
     }
-    public void checkSkills(){
+
+    public void checkSkills() {
         File skillsFolder = getSkillFolder().toFile();
         if (!skillsFolder.exists()) {
             skillsFolder.mkdirs();

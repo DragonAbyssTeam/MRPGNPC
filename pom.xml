@@ -23,6 +23,12 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.16.16</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
             <groupId>com.muffinhead</groupId>
             <artifactId>mdungeon</artifactId>
             <version>1.0.0</version>

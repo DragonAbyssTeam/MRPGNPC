@@ -17,14 +17,12 @@ public class AutoSpawn extends Task {
 
     @Override
     public void onRun(int i) {
-        //spawntick
-        for (String s : spawnTick.keySet()) {
-            spawnTick.put(s, spawnTick.get(s) + 1);
-        }
+        //Spawn tick
+        spawnTick.replaceAll((s, v) -> v + 1);
 
         //spawn
         for (Config config : MRPGNPC.pointconfigs.values()) {
-            //spawnpoint position
+            //Spawn point position
 
             if (!MRPGNPC.mrpgnpc.getServer().loadLevel(config.getString("PointPosition").split(":")[3])) {
                 System.out.println("level " + config.getString("PointPosition").split(":")[3] + " is not exist");
@@ -39,7 +37,7 @@ public class AutoSpawn extends Task {
                 location.yaw = Double.parseDouble(config.getString("PointPosition").split(":")[4]);
                 location.pitch = Double.parseDouble(config.getString("PointPosition").split(":")[5]);
             }
-            //mobs spawnlist and limit
+            //mobs spawn list and limit
             List<String> spawnlist = config.getList("SpawnList");
             for (String spawns : spawnlist) {
      /*

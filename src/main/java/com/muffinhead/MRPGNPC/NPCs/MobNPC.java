@@ -192,7 +192,7 @@ public class MobNPC extends NPC {
                 if (skillTick.get(s) > 0) {
                     skillTick.put(s, skillTick.get(s) - 1);
                 } else {
-                    skillTick.put(skinname, 0);
+                    skillTick.put(skinName, 0);
                 }
             }
         }
@@ -200,14 +200,14 @@ public class MobNPC extends NPC {
 
     public void noHateHeal() {
         try {
-            String[] lbhealthing = nohatesheal.split(":");
-            if (this.nhhealtick >= Integer.parseInt(lbhealthing[0])) {
+            String[] lbhealthing = noHatesHeal.split(":");
+            if (this.nhHealTick >= Integer.parseInt(lbhealthing[0])) {
                 this.heal((float) Double.parseDouble(lbhealthing[1]));
             }
             if (this.target != null) {
-                nhhealtick = 0;
+                nhHealTick = 0;
             } else {
-                nhhealtick++;
+                nhHealTick++;
             }
         } catch (NumberFormatException ignored) {
 
@@ -296,8 +296,7 @@ public class MobNPC extends NPC {
         if (this.SkillDelay <= 0) {
             switch (s[0]) {
                 case "Delay": {
-                    int tick = parseInt(s[1]);
-                    MobNPC.this.SkillDelay = tick;
+                    MobNPC.this.SkillDelay = parseInt(s[1]);
                     break;
                 }
                 case "Damage": {
@@ -338,8 +337,7 @@ public class MobNPC extends NPC {
                                 vector3.z = 0.1;
                             }
                             vector3.y = strength * 0.23D;
-                            double impact = strength;
-                            entity.setMotion(vector3.multiply(impact));
+                            entity.setMotion(vector3.multiply(strength));
                         }
                     }
                     break;
@@ -422,11 +420,11 @@ public class MobNPC extends NPC {
                     break;
                 }
                 case "ChangeAttackRange": {
-                    mob.setAttackrange(readEntityParameters(s[1]));
+                    mob.setAttackRange(readEntityParameters(s[1]));
                     break;
                 }
                 case "setAttackDelay": {
-                    mob.attackdelay = Integer.parseInt(s[1]);
+                    mob.attackDelay = Integer.parseInt(s[1]);
                     break;
                 }
                 case "ChangeSkin": {
@@ -480,7 +478,7 @@ public class MobNPC extends NPC {
                 }
                 case "ChangeKnockback": {
                     double knockback = readEntityParameters(s[1]);
-                    mob.setKnockback((float) knockback);
+                    mob.setKnockBack((float) knockback);
                     break;
                 }
                 case "ChangeMovementSpeed": {
@@ -490,12 +488,11 @@ public class MobNPC extends NPC {
                 }
                 case "ChangeAttackdDelay": {
                     int speed = Integer.parseInt(s[1]);
-                    mob.setAttackdelay(speed);
+                    mob.setAttackDelay(speed);
                     break;
                 }
                 case "ChangeDefenseFormula": {
-                    String defenseFormula = s[1];
-                    this.defenseformula = defenseFormula;
+                    this.defenseFormula = s[1];
                     break;
                 }
                 case "InsertSkill": {

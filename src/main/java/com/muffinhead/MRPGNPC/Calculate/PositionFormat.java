@@ -44,7 +44,7 @@ public class PositionFormat {
     /* pitch平视为0，仰视为-90 */
     public static double[] PolarToCoordinate(double distance, double yaw, double pitch) {
         double[] pos = new double[3],
-                ppos = new double[2];
+                ppos;
         pos[1] = -sinDistance(distance, pitch);
         //distance = Math.abs(pos[1])/Math.tan(radian(pitch));  等价于下一句
         distance = distance * Math.cos(radian(pitch));

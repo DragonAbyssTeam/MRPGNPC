@@ -1,5 +1,6 @@
 package com.muffinhead.MRPGNPC.Effects;
 
+import cn.nukkit.Server;
 import cn.nukkit.entity.Entity;
 import cn.nukkit.entity.projectile.EntityProjectile;
 import cn.nukkit.event.Event;
@@ -16,13 +17,13 @@ public class Bullet extends EntityProjectile {
     public float damage = 0f;
     public float knockback = 0f;
     public Entity master;
-    int networkID = 81;
-    Position spawnPosition;
-    double motionx = 0;
-    double motiony = 0;
-    double motionz = 0;
-    double fyaw = 0;
-    double fpitch = 0;
+    public int networkID = 81;
+    public Position spawnPosition;
+    public double motionx = 0;
+    public double motiony = 0;
+    public double motionz = 0;
+    public double fyaw = 0;
+    public double fpitch = 0;
 
     public Bullet(FullChunk chunk, CompoundTag nbt, Entity entity, int networkID, Vector3 motion, double yaw, double pitch) {
         super(chunk, nbt);
@@ -54,7 +55,8 @@ public class Bullet extends EntityProjectile {
                     if (this.getPosition().distance(spawnPosition) >= MaxDistance) {
                         this.close();
                     }
-                } catch (Exception e) {
+                } catch (Exception ignored) {
+                    //this.getServer().getLogger().error("", e);
                 }
             }
             this.setMotion(new Vector3(motionx, motiony, motionz));
@@ -69,17 +71,17 @@ public class Bullet extends EntityProjectile {
         this.server.getPluginManager().callEvent(e);
         if (!e.isCancelled()) {
             float damage = (float) this.getResultDamage();
-            Object ev;
+            EntityDamageEvent ev;
             if (this.shootingEntity == null) {
                 ev = new EntityDamageByEntityEvent(this, entity, EntityDamageEvent.DamageCause.PROJECTILE, damage);
             } else {
                 ev = new EntityDamageByChildEntityEvent(this.shootingEntity, this, entity, EntityDamageEvent.DamageCause.PROJECTILE, damage);
             }
 
-            if (entity.attack((EntityDamageEvent) ev)) {
+            if (entity.attack(ev)) {
                 if (this.fireTicks > 0) {
                     EntityCombustByEntityEvent event = new EntityCombustByEntityEvent(this, entity, 5);
-                    this.server.getPluginManager().callEvent((Event) ev);
+                    this.server.getPluginManager().callEvent(ev);
                     if (!event.isCancelled()) {
                         entity.setOnFire(event.getDuration());
                     }
@@ -110,11 +112,10 @@ public class Bullet extends EntityProjectile {
                     Entity[] list = this.getLevel().getCollidingEntities(this.boundingBox.addCoord(this.motionX, this.motionY, this.motionZ).expand(1.0D, 1.0D, 1.0D), this);
                     double nearDistance = 2.147483647E9D;
                     Entity nearEntity = null;
-                    Entity[] var10 = list;
                     int var11 = list.length;
 
                     for (int var12 = 0; var12 < var11; ++var12) {
-                        Entity entity = var10[var12];
+                        Entity entity = list[var12];
                         if (entity == shootingEntity) {
                             entity = null;
                         }

@@ -30,6 +30,8 @@ import cn.nukkit.potion.Effect;
 import cn.nukkit.scheduler.Task;
 import com.muffinhead.MRPGNPC.MRPGNPC;
 import com.muffinhead.mdungeon.DataPacketLimit;
+import lombok.Getter;
+import lombok.Setter;
 
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
@@ -40,8 +42,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadLocalRandom;
 
 
+@Getter
+@Setter
 public class NPC extends EntityHuman {
-    public int nhhealtick = 0;
+    public int nhHealTick = 0;
     public List<String> skills = new ArrayList<>();
     public ConcurrentHashMap<String, Object> status = new ConcurrentHashMap<>();
     protected boolean isAttacking = false;
@@ -49,33 +53,33 @@ public class NPC extends EntityHuman {
     protected Position spawnPosition;
     protected String geometryName = "";
     protected String mobFeature = "";
-    protected String skinname = "";
+    protected String skinName = "";
     protected double speed = 1.0;
 
     protected Entity target = null;
 
-    protected double attackrange = 1.0;
-    protected double hitrange = 0.2;
+    protected double attackRange = 1.0;
+    protected double hitRange = 0.2;
     protected double damage = 3.0;
     protected String displayName = "";
-    protected double knockback = 0.1;
-    protected String defenseformula = "source.damage";
-    protected int attackdelay = 30;
-    protected int attackdelayed = 0;
-    protected int damagedelay = 0;
-    protected ConcurrentHashMap<Entity, Integer> bedamageCD = new ConcurrentHashMap<>();
-    protected int bedamageddelay = 0;
-    protected double haterange = 15.0;
-    protected String nohatesheal = "200:1.0";
-    protected boolean canbeknockback = false;
-    protected List<String> deathcommands = new ArrayList<>();
-    protected String bedamagedblockparticle = "152:0";
+    protected double knockBack = 0.1;
+    protected String defenseFormula = "source.damage";
+    protected int attackDelay = 30;
+    protected int attackDelayed = 0;
+    protected int damageDelay = 0;
+    protected ConcurrentHashMap<Entity, Integer> beDamageCD = new ConcurrentHashMap<>();
+    protected int beDamagedDelay = 0;
+    protected double hateRange = 15.0;
+    protected String noHatesHeal = "200:1.0";
+    protected boolean canBeKnockback = false;
+    protected List<String> deathCommands = new ArrayList<>();
+    protected String beDamagedBlockParticle = "152:0";
     protected List<String> drops = new ArrayList<>();
     protected ConcurrentHashMap<Entity, Integer> cantAttractiveTarget = new ConcurrentHashMap<>();
     protected ConcurrentHashMap<Entity, Float> damagePool = new ConcurrentHashMap<>();
     protected ConcurrentHashMap<Entity, Float> hatePool = new ConcurrentHashMap<>();
-    protected List<String> activeattackcreature = new ArrayList<>();
-    protected List<String> unattractivecreature = new ArrayList<>();
+    protected List<String> activeAttackCreature = new ArrayList<>();
+    protected List<String> unAttractiveCreature = new ArrayList<>();
     protected boolean enableBox = true;
     private double frontX;
     private double frontY;
@@ -99,7 +103,7 @@ public class NPC extends EntityHuman {
     public static List<Entity> getMaxValueList(ConcurrentHashMap<Entity, Float> map) {
         double max = 0.0f;
         String temp = "";
-        double value = 0.0f;
+        double value;
         List<Entity> list = new ArrayList<>();
         for (Entity entity : map.keySet()) {
             value = map.get(entity);
@@ -117,7 +121,7 @@ public class NPC extends EntityHuman {
     public static Entity getMaxValue(ConcurrentHashMap<Entity, Float> map) {
         double max = -100000000000000000000000000000000000000.0F;
         Entity temp = null;
-        double value = 0.0D;
+        double value;
         for (Entity key : map.keySet()) {
             value = map.get(key);
             if (max < value) {
@@ -131,7 +135,7 @@ public class NPC extends EntityHuman {
     public static Entity getMinValue(ConcurrentHashMap<Entity, Float> map) {
         float min = 100000000000000000000000000000000000000.0F;
         Entity temp = null;
-        float value = 0.0F;
+        float value;
         for (Entity key : map.keySet()) {
             value = map.get(key);
             if (min > value) {
@@ -193,9 +197,9 @@ public class NPC extends EntityHuman {
         if (speed < 0) {
             speed = 0;
         }
-        Double x = 0d;
-        Double y = 0d;
-        Double z = 0d;
+        double x = 0d;
+        double y = 0d;
+        double z = 0d;
 
         if (this.spawnPosition != null) {
             x = this.x - this.spawnPosition.x;
@@ -223,7 +227,7 @@ public class NPC extends EntityHuman {
         frontZ = speed * 0.15D * Math.sin(frontYaw);
 
 
-        boolean isjump = true;
+        boolean isjump;
         isjump = checkJump(frontX, frontZ);
 
         if (!isjump) {
@@ -241,7 +245,7 @@ public class NPC extends EntityHuman {
             if (this.isAttacking) {
                 this.move(0.0D, this.frontY, 0.0D);
             } else {
-                if (distance((Vector3) target) < this.attackrange) {
+                if (distance((Vector3) target) < this.attackRange) {
                     this.move(0.0D, this.frontY, 0.0D);
                 } else {
                     this.move(frontX, this.frontY, frontZ);
@@ -323,7 +327,7 @@ public class NPC extends EntityHuman {
         if (this.target != null && !this.level.getName().equals(this.target.getLevel().getName())) {
             this.target = null;
         }
-        if (this.target != null && this.target.distance((Vector3) this) > this.haterange) {
+        if (this.target != null && this.target.distance((Vector3) this) > this.hateRange) {
             this.target = null;
         }
 
@@ -404,9 +408,9 @@ public class NPC extends EntityHuman {
     public Entity getTarget() {
         List<Entity> entities = new ArrayList<>();
         for (Entity entity : getLevel().getEntities()) {
-            if (entity.distance(this) <= this.haterange) {
-                if (activeattackcreature != null) {
-                    simplifyTarget(entities, activeattackcreature, entity);
+            if (entity.distance(this) <= this.hateRange) {
+                if (activeAttackCreature != null) {
+                    simplifyTarget(entities, activeAttackCreature, entity);
                 }
             }
         }
@@ -415,9 +419,9 @@ public class NPC extends EntityHuman {
         }
         ConcurrentHashMap<Entity, Float> map = new ConcurrentHashMap<>();
         if (hatePool != null) {
-            map = new ConcurrentHashMap<Entity, Float>(hatePool);
+            map = new ConcurrentHashMap<>(hatePool);
         }
-        removeUnattractiveCreature(map, unattractivecreature);
+        removeUnattractiveCreature(map, unAttractiveCreature);
         if (!map.isEmpty()) {
             for (Map.Entry<Entity, Float> s : map.entrySet()) {
                 ///////////////////
@@ -451,7 +455,7 @@ public class NPC extends EntityHuman {
                 }
                 if (!map.isEmpty()) {
                     if (map.containsKey(s.getKey())) {
-                        if (s.getKey().distance(this) >= this.haterange) {
+                        if (s.getKey().distance(this) >= this.hateRange) {
                             map.remove(s.getKey());
                         }
                     }
@@ -481,16 +485,11 @@ public class NPC extends EntityHuman {
             //向Map中添加数据
             //.....
             //转换
-            ArrayList<Map.Entry<Entity, Float>> arrayList = new ArrayList<Map.Entry<Entity, Float>>(map.entrySet());
+            ArrayList<Map.Entry<Entity, Float>> arrayList = new ArrayList<>(map.entrySet());
             //排序
-            Collections.sort(arrayList, new Comparator<Map.Entry<Entity, Float>>() {
-                public int compare(Map.Entry<Entity, Float> map1,
-                                   Map.Entry<Entity, Float> map2) {
-                    return ((map2.getValue() - map1.getValue() == 0) ? 0
-                            : (map2.getValue() - map1.getValue() > 0) ? 1
-                            : -1);
-                }
-            });
+            arrayList.sort((map1, map2) -> ((map2.getValue() - map1.getValue() == 0) ? 0
+                    : (map2.getValue() - map1.getValue() > 0) ? 1
+                    : -1));
             ConcurrentHashMap<Entity, Float> firstHateMap = new ConcurrentHashMap<>();
             for (Map.Entry<Entity, Float> entry : arrayList) {
                 firstHateMap.put(entry.getKey(), entry.getValue());
@@ -510,7 +509,7 @@ public class NPC extends EntityHuman {
     }
 
     public List<Entity> getTargets(String[] s) {
-        return getTargets(s[0], s.length < 2 ? 0 : Double.parseDouble(s[2]), s.length < 3 ? this.getHaterange() : Integer.parseInt(s[2]), s.length < 4 ? this.level.getEntities().length : Integer.parseInt(s[3]), null);
+        return getTargets(s[0], s.length < 2 ? 0 : Double.parseDouble(s[2]), s.length < 3 ? this.getHateRange() : Integer.parseInt(s[2]), s.length < 4 ? this.level.getEntities().length : Integer.parseInt(s[3]), null);
     }
 
     public List<Entity> getTargets(String type, double figure, double distance, int amountlimit, List<String> creaturetype) {
@@ -520,7 +519,7 @@ public class NPC extends EntityHuman {
                 if (creaturetype != null) {
                     simplifyTarget(entities, creaturetype, entity);
                 } else {
-                    simplifyTarget(entities, activeattackcreature, entity);
+                    simplifyTarget(entities, activeAttackCreature, entity);
                 }
             }
         }
@@ -610,7 +609,7 @@ public class NPC extends EntityHuman {
                     if (creaturetype != null) {
                         removeUnattractiveCreature(entities, creaturetype);
                     } else {
-                        removeUnattractiveCreature(entities, activeattackcreature);
+                        removeUnattractiveCreature(entities, activeAttackCreature);
                     }
                 }
                 break;
@@ -682,13 +681,13 @@ public class NPC extends EntityHuman {
                                             Long roomid = Long.valueOf(this.mobFeature.split(":")[this.mobFeature.split(":").length - 1]);
                                             if (entity instanceof Player) {
                                                 if (DataPacketLimit.limitPlayers.containsKey(entity.getId())) {
-                                                    if (DataPacketLimit.limitPlayers.get(entity.getId()) != roomid) {
+                                                    if (!Objects.equals(DataPacketLimit.limitPlayers.get(entity.getId()), roomid)) {
                                                         canBeChoose = false;
                                                     }
                                                 }
                                             } else {
                                                 if (DataPacketLimit.limitEntities.containsKey(entity.getId())) {
-                                                    if (DataPacketLimit.limitEntities.get(entity.getId()) != roomid) {
+                                                    if (!Objects.equals(DataPacketLimit.limitEntities.get(entity.getId()), roomid)) {
                                                         canBeChoose = false;
                                                     }
                                                 }
@@ -703,7 +702,7 @@ public class NPC extends EntityHuman {
                                             Long roomid = Long.valueOf(this.mobFeature.split(":")[this.mobFeature.split(":").length - 1]);
                                             if (entity instanceof Player) {
                                                 if (DataPacketLimit.limitPlayers.containsKey(entity.getId())) {
-                                                    if (DataPacketLimit.limitPlayers.get(entity.getId()) == roomid) {
+                                                    if (Objects.equals(DataPacketLimit.limitPlayers.get(entity.getId()), roomid)) {
                                                         canBeChoose = false;
                                                     }
                                                 } else {
@@ -711,7 +710,7 @@ public class NPC extends EntityHuman {
                                                 }
                                             } else {
                                                 if (DataPacketLimit.limitEntities.containsKey(entity.getId())) {
-                                                    if (DataPacketLimit.limitEntities.get(entity.getId()) == roomid) {
+                                                    if (Objects.equals(DataPacketLimit.limitEntities.get(entity.getId()), roomid)) {
                                                         canBeChoose = false;
                                                     }
                                                 } else {
@@ -770,13 +769,13 @@ public class NPC extends EntityHuman {
                                         Long roomid = Long.valueOf(this.mobFeature.split(":")[this.mobFeature.split(":").length - 1]);
                                         if (entity instanceof Player) {
                                             if (DataPacketLimit.limitPlayers.containsKey(entity.getId())) {
-                                                if (DataPacketLimit.limitPlayers.get(entity.getId()) == roomid) {
+                                                if (Objects.equals(DataPacketLimit.limitPlayers.get(entity.getId()), roomid)) {
                                                     entities.remove(entity);
                                                 }
                                             }
                                         } else {
                                             if (DataPacketLimit.limitEntities.containsKey(entity.getId())) {
-                                                if (DataPacketLimit.limitEntities.get(entity.getId()) == roomid) {
+                                                if (Objects.equals(DataPacketLimit.limitEntities.get(entity.getId()), roomid)) {
                                                     entities.remove(entity);
                                                 }
                                             }
@@ -791,7 +790,7 @@ public class NPC extends EntityHuman {
                                         Long roomid = Long.valueOf(this.mobFeature.split(":")[this.mobFeature.split(":").length - 1]);
                                         if (entity instanceof Player) {
                                             if (DataPacketLimit.limitPlayers.containsKey(entity.getId())) {
-                                                if (DataPacketLimit.limitPlayers.get(entity.getId()) != roomid) {
+                                                if (!Objects.equals(DataPacketLimit.limitPlayers.get(entity.getId()), roomid)) {
                                                     entities.remove(entity);
                                                 }
                                             } else {
@@ -799,7 +798,7 @@ public class NPC extends EntityHuman {
                                             }
                                         } else {
                                             if (DataPacketLimit.limitEntities.containsKey(entity.getId())) {
-                                                if (DataPacketLimit.limitEntities.get(entity.getId()) != roomid) {
+                                                if (!Objects.equals(DataPacketLimit.limitEntities.get(entity.getId()), roomid)) {
                                                     entities.remove(entity);
                                                 }
                                             } else {
@@ -871,13 +870,13 @@ public class NPC extends EntityHuman {
                                             Long roomid = Long.valueOf(this.mobFeature.split(":")[this.mobFeature.split(":").length - 1]);
                                             if (entity instanceof Player) {
                                                 if (DataPacketLimit.limitPlayers.containsKey(entity.getId())) {
-                                                    if (DataPacketLimit.limitPlayers.get(entity.getId()) != roomid) {
+                                                    if (!Objects.equals(DataPacketLimit.limitPlayers.get(entity.getId()), roomid)) {
                                                         canBeChoose = false;
                                                     }
                                                 }
                                             } else {
                                                 if (DataPacketLimit.limitEntities.containsKey(entity.getId())) {
-                                                    if (DataPacketLimit.limitEntities.get(entity.getId()) != roomid) {
+                                                    if (!Objects.equals(DataPacketLimit.limitEntities.get(entity.getId()), roomid)) {
                                                         canBeChoose = false;
                                                     }
                                                 }
@@ -892,7 +891,7 @@ public class NPC extends EntityHuman {
                                             Long roomid = Long.valueOf(this.mobFeature.split(":")[this.mobFeature.split(":").length - 1]);
                                             if (entity instanceof Player) {
                                                 if (DataPacketLimit.limitPlayers.containsKey(entity.getId())) {
-                                                    if (DataPacketLimit.limitPlayers.get(entity.getId()) != roomid) {
+                                                    if (!Objects.equals(DataPacketLimit.limitPlayers.get(entity.getId()), roomid)) {
                                                         map.remove(entity);
                                                     }
                                                 } else {
@@ -900,7 +899,7 @@ public class NPC extends EntityHuman {
                                                 }
                                             } else {
                                                 if (DataPacketLimit.limitEntities.containsKey(entity.getId())) {
-                                                    if (DataPacketLimit.limitEntities.get(entity.getId()) != roomid) {
+                                                    if (!Objects.equals(DataPacketLimit.limitEntities.get(entity.getId()), roomid)) {
                                                         map.remove(entity);
                                                     }
                                                 } else {
@@ -959,13 +958,13 @@ public class NPC extends EntityHuman {
                                         Long roomid = Long.valueOf(this.mobFeature.split(":")[this.mobFeature.split(":").length - 1]);
                                         if (entity instanceof Player) {
                                             if (DataPacketLimit.limitPlayers.containsKey(entity.getId())) {
-                                                if (DataPacketLimit.limitPlayers.get(entity.getId()) == roomid) {
+                                                if (Objects.equals(DataPacketLimit.limitPlayers.get(entity.getId()), roomid)) {
                                                     map.remove(entity);
                                                 }
                                             }
                                         } else {
                                             if (DataPacketLimit.limitEntities.containsKey(entity.getId())) {
-                                                if (DataPacketLimit.limitEntities.get(entity.getId()) == roomid) {
+                                                if (Objects.equals(DataPacketLimit.limitEntities.get(entity.getId()), roomid)) {
                                                     map.remove(entity);
                                                 }
                                             }
@@ -980,7 +979,7 @@ public class NPC extends EntityHuman {
                                         Long roomid = Long.valueOf(this.mobFeature.split(":")[this.mobFeature.split(":").length - 1]);
                                         if (entity instanceof Player) {
                                             if (DataPacketLimit.limitPlayers.containsKey(entity.getId())) {
-                                                if (DataPacketLimit.limitPlayers.get(entity.getId()) != roomid) {
+                                                if (!Objects.equals(DataPacketLimit.limitPlayers.get(entity.getId()), roomid)) {
                                                     map.remove(entity);
                                                 }
                                             } else {
@@ -988,7 +987,7 @@ public class NPC extends EntityHuman {
                                             }
                                         } else {
                                             if (DataPacketLimit.limitEntities.containsKey(entity.getId())) {
-                                                if (DataPacketLimit.limitEntities.get(entity.getId()) != roomid) {
+                                                if (!Objects.equals(DataPacketLimit.limitEntities.get(entity.getId()), roomid)) {
                                                     map.remove(entity);
                                                 }
                                             } else {
@@ -1059,13 +1058,13 @@ public class NPC extends EntityHuman {
                                         Long roomid = Long.valueOf(this.mobFeature.split(":")[this.mobFeature.split(":").length - 1]);
                                         if (entity instanceof Player) {
                                             if (DataPacketLimit.limitPlayers.containsKey(entity.getId())) {
-                                                if (DataPacketLimit.limitPlayers.get(entity.getId()) != roomid) {
+                                                if (!Objects.equals(DataPacketLimit.limitPlayers.get(entity.getId()), roomid)) {
                                                     canBeChoose = false;
                                                 }
                                             }
                                         } else {
                                             if (DataPacketLimit.limitEntities.containsKey(entity.getId())) {
-                                                if (DataPacketLimit.limitEntities.get(entity.getId()) != roomid) {
+                                                if (!Objects.equals(DataPacketLimit.limitEntities.get(entity.getId()), roomid)) {
                                                     canBeChoose = false;
                                                 }
                                             }
@@ -1080,13 +1079,13 @@ public class NPC extends EntityHuman {
                                         Long roomid = Long.valueOf(this.mobFeature.split(":")[this.mobFeature.split(":").length - 1]);
                                         if (entity instanceof Player) {
                                             if (DataPacketLimit.limitPlayers.containsKey(entity.getId())) {
-                                                if (DataPacketLimit.limitPlayers.get(entity.getId()) == roomid) {
+                                                if (Objects.equals(DataPacketLimit.limitPlayers.get(entity.getId()), roomid)) {
                                                     canBeChoose = false;
                                                 }
                                             }
                                         } else {
                                             if (DataPacketLimit.limitEntities.containsKey(entity.getId())) {
-                                                if (DataPacketLimit.limitEntities.get(entity.getId()) == roomid) {
+                                                if (Objects.equals(DataPacketLimit.limitEntities.get(entity.getId()), roomid)) {
                                                     canBeChoose = false;
                                                 }
                                             }
@@ -1149,13 +1148,13 @@ public class NPC extends EntityHuman {
                                     Long roomid = Long.valueOf(this.mobFeature.split(":")[this.mobFeature.split(":").length - 1]);
                                     if (entity instanceof Player) {
                                         if (DataPacketLimit.limitPlayers.containsKey(entity.getId())) {
-                                            if (DataPacketLimit.limitPlayers.get(entity.getId()) == roomid) {
+                                            if (Objects.equals(DataPacketLimit.limitPlayers.get(entity.getId()), roomid)) {
                                                 entities.add(entity);
                                             }
                                         }
                                     } else {
                                         if (DataPacketLimit.limitEntities.containsKey(entity.getId())) {
-                                            if (DataPacketLimit.limitEntities.get(entity.getId()) == roomid) {
+                                            if (Objects.equals(DataPacketLimit.limitEntities.get(entity.getId()), roomid)) {
                                                 entities.add(entity);
                                             }
                                         }
@@ -1170,13 +1169,13 @@ public class NPC extends EntityHuman {
                                     Long roomid = Long.valueOf(this.mobFeature.split(":")[this.mobFeature.split(":").length - 1]);
                                     if (entity instanceof Player) {
                                         if (DataPacketLimit.limitPlayers.containsKey(entity.getId())) {
-                                            if (DataPacketLimit.limitPlayers.get(entity.getId()) != roomid) {
+                                            if (!Objects.equals(DataPacketLimit.limitPlayers.get(entity.getId()), roomid)) {
                                                 entities.add(entity);
                                             }
                                         }
                                     } else {
                                         if (DataPacketLimit.limitEntities.containsKey(entity.getId())) {
-                                            if (DataPacketLimit.limitEntities.get(entity.getId()) != roomid) {
+                                            if (!Objects.equals(DataPacketLimit.limitEntities.get(entity.getId()), roomid)) {
                                                 entities.add(entity);
                                             }
                                         }
@@ -1191,193 +1190,19 @@ public class NPC extends EntityHuman {
         }
     }
 
-    //Setting method
-
-    public String getCamp() {
-        return camp;
-    }
-
-    public void setCamp(String camp) {
-        this.camp = camp;
-    }
-
-    public void setSpeed(double speed) {
-        this.speed = speed;
-    }
-
-    public void setAttackdelay(int attackdelay) {
-        this.attackdelay = attackdelay;
-    }
-
-    public void setAttackrange(double attackrange) {
-        this.attackrange = attackrange;
-    }
-
-    public String getBeDamagedblockparticle() {
-        return bedamagedblockparticle;
-    }
-
-    public void setBeDamagedblockparticle(String beattackblockparticle) {
-        this.bedamagedblockparticle = beattackblockparticle;
-    }
-
-    public int getBedamageddelay() {
-        return bedamageddelay;
-    }
-
-    public void setBedamageddelay(int bedamageddelay) {
-        this.bedamageddelay = bedamageddelay;
-    }
-
-    public ConcurrentHashMap<Entity, Integer> getBedamageCD() {
-        return bedamageCD;
-    }
-
-    public void setBedamageCD(ConcurrentHashMap<Entity, Integer> bedamageCD) {
-        this.bedamageCD = bedamageCD;
-    }
-
-    public boolean getCanbeknockback() {
-        return canbeknockback;
-    }
-
-    public void setCanbeknockback(boolean canbeknockback) {
-        this.canbeknockback = canbeknockback;
-    }
-
-    public void setDamage(double damage) {
-        this.damage = damage;
-    }
-
-    public void setDamagedelay(int damagedelay) {
-        this.damagedelay = damagedelay;
-    }
-
-    public ConcurrentHashMap<Entity, Float> getDamagePool() {
-        return damagePool;
-    }
-
-    public void setDamagePool(ConcurrentHashMap<Entity, Float> damagePool) {
-        this.damagePool = damagePool;
-    }
-
-    public ConcurrentHashMap<Entity, Float> getHatePool() {
-        return hatePool;
-    }
-
-    public void setHatePool(ConcurrentHashMap<Entity, Float> hatePool) {
-        this.hatePool = hatePool;
-    }
-
-    public List<String> getDeathcommands() {
-        return deathcommands;
-    }
-
-    public void setDeathcommands(List<String> deathcommands) {
-        this.deathcommands = deathcommands;
-    }
-
-    public String getDefenseformula() {
-        return defenseformula;
-    }
-
-    public void setDefenseformula(String defenseformula) {
-        this.defenseformula = defenseformula;
-    }
-
-    public void setDisplayName(String displayName) {
-        this.displayName = displayName;
-    }
-
-    public double getHaterange() {
-        return haterange;
-    }
-
-    public void setHaterange(double haterange) {
-        this.haterange = haterange;
-    }
-
-    public void setNohatesheal(String nohatesheal) {
-        this.nohatesheal = nohatesheal;
-    }
-
-    public void setKnockback(double knockback) {
-        this.knockback = knockback;
-    }
-
-    public String getSkinname() {
-        return skinname;
-    }
-
-    public void setSkinname(String skinname) {
-        this.skinname = skinname;
-    }
-
-    public List<String> getActiveattackcreature() {
-        return activeattackcreature;
-    }
-
-    public void setActiveattackcreature(List<String> activeattackcreature) {
-        this.activeattackcreature = activeattackcreature;
-    }
-
-    public List<String> getUnattractivecreature() {
-        return unattractivecreature;
-    }
-
-    public void setUnattractivecreature(List<String> unattractivecreature) {
-        this.unattractivecreature = unattractivecreature;
-    }
-
-    public void setHitrange(double hitrange) {
-        this.hitrange = hitrange;
-    }
-
-    public String getMobFeature() {
-        return mobFeature;
-    }
-
-    public void setMobFeature(String mobPoint) {
-        this.mobFeature = mobPoint;
-    }
-
-    public boolean isAttacking() {
-        return isAttacking;
-    }
-
-    public ConcurrentHashMap<Entity, Integer> getCantAttractiveTarget() {
-        return cantAttractiveTarget;
-    }
-
-    public void setCantAttractiveTarget(ConcurrentHashMap<Entity, Integer> cantAttractiveTarget) {
-        this.cantAttractiveTarget = cantAttractiveTarget;
-    }
-
-    public void setGeometryName(String geometryName) {
-        this.geometryName = geometryName;
-    }
-
-    public void setEnableBox(boolean enableBox) {
-        this.enableBox = enableBox;
-    }
-
-    public void setSkills(List<String> skills) {
-        this.skills = skills;
-    }
-
     //attack method
     public void attackEntity(Entity target) {
-        attackdelayed++;
+        attackDelayed++;
         boolean canAttack = true;
         if (this.hasEffect(15)) {
             if (new Random().nextInt(101) <= 50) {
                 canAttack = false;
             }
         }
-        if (this.attackdelayed >= this.attackdelay) {
-            if (distance(target) / target.scale <= this.attackrange) {
+        if (this.attackDelayed >= this.attackDelay) {
+            if (distance(target) / target.scale <= this.attackRange) {
                 Position position = target.getPosition().clone();
-                float knockback = (float) this.knockback;
+                float knockback = (float) this.knockBack;
                 HashMap<EntityDamageEvent.DamageModifier, Float> damage = new HashMap<>();
                 damage.put(EntityDamageEvent.DamageModifier.BASE, (float) this.damage);
                 if (target != null) {
@@ -1403,7 +1228,7 @@ public class NPC extends EntityHuman {
                                 for (Entity entity : getLevel().getEntities()) {
                                     if (entity != npc) {
                                         if (hatePool.containsKey(entity)) {
-                                            if (entity.distanceSquared(position) <= npc.hitrange) {
+                                            if (entity.distanceSquared(position) <= npc.hitRange) {
                                                 if (finalCanAttack) {
                                                     if (npc.isAlive()) {
                                                         EntityDamageByEntityEvent event = new EntityDamageByEntityEvent(npc, entity, EntityDamageEvent.DamageCause.ENTITY_ATTACK, damage);
@@ -1416,10 +1241,10 @@ public class NPC extends EntityHuman {
                                     }
                                 }
                                 broadcastEntityEvent(4);
-                                npc.attackdelayed = 0;
+                                npc.attackDelayed = 0;
                                 isAttacking = false;
                             }
-                        }, this.damagedelay, true);
+                        }, this.damageDelay, true);
                     }
                     this.isAttacking = true;
                 }
@@ -1475,7 +1300,7 @@ public class NPC extends EntityHuman {
     }
 
     public void beattackparticle() {
-        String[] iddamage = getBeDamagedblockparticle().split(":");
+        String[] iddamage = getBeDamagedBlockParticle().split(":");
         int id = Integer.parseInt(iddamage[0]);
         int damage = Integer.parseInt(iddamage[1]);
         Block block = Block.get(id, damage);
@@ -1497,7 +1322,27 @@ public class NPC extends EntityHuman {
         CompoundTag itemTag = NBTIO.putItemHelper(item);
         itemTag.setName("Item");
         if (item.getId() > 0 && item.getCount() > 0) {
-            EntityItem itemEntity = (EntityItem) Entity.createEntity("Item", this.getLevel().getChunk((int) source.getX() >> 4, (int) source.getZ() >> 4, true), (new CompoundTag()).putList((new ListTag("Pos")).add(new DoubleTag("", source.getX())).add(new DoubleTag("", source.getY())).add(new DoubleTag("", source.getZ()))).putList((new ListTag("Motion")).add(new DoubleTag("", motion.x)).add(new DoubleTag("", motion.y)).add(new DoubleTag("", motion.z))).putList((new ListTag("Rotation")).add(new FloatTag("", (new Random()).nextFloat() * 360.0F)).add(new FloatTag("", 0.0F))).putShort("Health", 5).putCompound("Item", itemTag).putShort("PickupDelay", delay), new Object[0]);
+            EntityItem itemEntity = (EntityItem) Entity.createEntity(
+                    "Item",
+                    this.getLevel().getChunk((int) source.getX() >> 4, (int) source.getZ() >> 4, true),
+                    (new CompoundTag())
+                            .putList(
+                                    (new ListTag("Pos"))
+                                            .add(new DoubleTag("", source.getX()))
+                                            .add(new DoubleTag("", source.getY()))
+                                            .add(new DoubleTag("", source.getZ())))
+                            .putList(
+                                    (new ListTag("Motion"))
+                                            .add(new DoubleTag("", motion.x))
+                                            .add(new DoubleTag("", motion.y))
+                                            .add(new DoubleTag("", motion.z)))
+                            .putList(
+                                    (new ListTag("Rotation"))
+                                            .add(new FloatTag("", (new Random()).nextFloat() * 360.0F))
+                                            .add(new FloatTag("", 0.0F)))
+                            .putShort("Health", 5)
+                            .putCompound("Item", itemTag)
+                            .putShort("PickupDelay", delay), new Object[0]);
             if (itemEntity != null) {
                 //IF you need you can change the method type :)
                 itemEntity.spawnToAll();
@@ -1544,12 +1389,12 @@ public class NPC extends EntityHuman {
     }
 
     public void bedamagedcdCheck() {
-        if (bedamageCD != null) {
-            for (Entity entity : bedamageCD.keySet()) {
-                if (bedamageCD.get(entity) > 0) {
-                    bedamageCD.put(entity, bedamageCD.get(entity) - 1);
+        if (beDamageCD != null) {
+            for (Entity entity : beDamageCD.keySet()) {
+                if (beDamageCD.get(entity) > 0) {
+                    beDamageCD.put(entity, beDamageCD.get(entity) - 1);
                 } else {
-                    bedamageCD.remove(entity);
+                    beDamageCD.remove(entity);
                 }
             }
         }
@@ -1569,8 +1414,7 @@ public class NPC extends EntityHuman {
         ScriptEngine se = manager.getEngineByName("javascript");
         s = recoverString(s);
         try {
-            Double d = Double.valueOf(se.eval(s).toString());
-            return d;
+            return Double.parseDouble(se.eval(s).toString());
         } catch (ScriptException e) {
             System.out.println(s);
             try {
@@ -1633,7 +1477,7 @@ public class NPC extends EntityHuman {
             if (!this.hasSpawned.containsKey(player.getLoaderId())) {
                 this.hasSpawned.put(player.getLoaderId(), player);
                 if (this.skin == null) {
-                    this.skin = MRPGNPC.skins.get(skinname);
+                    this.skin = MRPGNPC.skins.get(skinName);
                 }
                 PlayerSkinPacket packet = new PlayerSkinPacket();
                 packet.uuid = this.uuid;

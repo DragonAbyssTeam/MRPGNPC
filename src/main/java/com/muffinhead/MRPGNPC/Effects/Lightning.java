@@ -66,8 +66,7 @@ public class Lightning extends EntityLightning {
                     Entity[] var9 = this.level.getCollidingEntities(bb, this);
                     int var10 = var9.length;
 
-                    for (int var6 = 0; var6 < var10; ++var6) {
-                        Entity entity = var9[var6];
+                    for (Entity entity : var9) {
                         entity.onStruckByLightning(this);
                     }
                 }

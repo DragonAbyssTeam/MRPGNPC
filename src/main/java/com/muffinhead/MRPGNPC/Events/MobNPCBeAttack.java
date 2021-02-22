@@ -57,7 +57,7 @@ public class MobNPCBeAttack implements Listener {
                 }
                 //defense
                 float damage = event.getFinalDamage();
-                damage = (float) ((MobNPC) entity).readEntityParameters(((MobNPC) entity).getDefenseformula().replaceAll("source\\.damage", damage + ""));
+                damage = (float) ((MobNPC) entity).readEntityParameters(((MobNPC) entity).getDefenseFormula().replaceAll("source\\.damage", damage + ""));
                 event.setDamage(damage);
                 //defense
                 //checkbedamagedcd
@@ -115,7 +115,7 @@ public class MobNPCBeAttack implements Listener {
 
     public void KnockBackNPC(MobNPC npc, EntityDamageByEntityEvent event) {
         Entity damager = event.getDamager();
-        if (npc.getCanbeknockback()) {
+        if (npc.isCanBeKnockback()) {
             double frontYaw = ((damager.yaw + 90.0D) * Math.PI) / 180.0D;
             double frontX = event.getKnockBack() * 5 * Math.cos(frontYaw);
             double frontZ = event.getKnockBack() * 5 * Math.sin(frontYaw);
@@ -130,10 +130,10 @@ public class MobNPCBeAttack implements Listener {
         Entity damager = event.getDamager();
         Entity npc = event.getEntity();
         if (npc instanceof MobNPC) {
-            ConcurrentHashMap<Entity, Integer> bedamagedcd = ((MobNPC) npc).getBedamageCD();
+            ConcurrentHashMap<Entity, Integer> bedamagedcd = ((MobNPC) npc).getBeDamageCD();
             if (!bedamagedcd.containsKey(damager)) {
-                bedamagedcd.put(damager, ((MobNPC) npc).getBedamageddelay());
-                ((MobNPC) npc).setBedamageCD(bedamagedcd);
+                bedamagedcd.put(damager, ((MobNPC) npc).getBeDamagedDelay());
+                ((MobNPC) npc).setBeDamageCD(bedamagedcd);
             } else {
                 event.setCancelled();
             }
@@ -145,7 +145,7 @@ public class MobNPCBeAttack implements Listener {
     public void onKilled(EntityDeathEvent event) {
         Entity entity = event.getEntity();
         if (entity instanceof MobNPC) {
-            List<String> deathcommands = ((MobNPC) entity).getDeathcommands();
+            List<String> deathcommands = ((MobNPC) entity).getDeathCommands();
             commands(deathcommands, (MobNPC) entity);
             ((MobNPC) entity).Drop();
         }

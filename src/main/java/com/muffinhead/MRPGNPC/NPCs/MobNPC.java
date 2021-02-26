@@ -384,10 +384,9 @@ public class MobNPC extends NPC {
                     double x = readEntityParameters(s[1]);
                     double y = readEntityParameters(s[2]);
                     double z = readEntityParameters(s[3]);
-                    Vector3 vector3 = new Vector3(x, y, z);
-                    List<Player> players = new ArrayList<>();
-                    this.level.addParticle(new ExplodeParticle(vector3), players);
-                    this.level.addParticle(new HugeExplodeSeedParticle(vector3), players);
+                    Vector3 vector3 = this.getLocation().add(x, y, z);
+                    this.level.addParticle(new ExplodeParticle(vector3));
+                    this.level.addParticle(new HugeExplodeSeedParticle(vector3));
                     this.level.addLevelSoundEvent(vector3, 48);
                     break;
                 }

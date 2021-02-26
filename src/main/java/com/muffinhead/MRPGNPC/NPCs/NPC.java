@@ -508,7 +508,12 @@ public class NPC extends EntityHuman {
     }
 
     public List<Entity> getTargets(String[] s) {
-        return getTargets(s[0], s.length < 2 ? 0 : Double.parseDouble(s[2]), s.length < 3 ? this.getHateRange() : Integer.parseInt(s[2]), s.length < 4 ? this.level.getEntities().length : Integer.parseInt(s[3]), null);
+        return getTargets(
+                s[0],
+                s.length < 2 ? 0 : Double.parseDouble(s[1]),
+                s.length < 3 ? this.getHateRange() : Integer.parseInt(s[2]),
+                s.length < 4 ? this.level.getEntities().length : Integer.parseInt(s[3]),
+                null);
     }
 
     public List<Entity> getTargets(String type, double figure, double distance, int amountlimit, List<String> creaturetype) {

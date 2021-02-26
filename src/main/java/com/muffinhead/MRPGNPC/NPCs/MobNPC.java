@@ -346,7 +346,7 @@ public class MobNPC extends NPC {
                     int tick = (int) readEntityParameters(s[2]);
                     List<Entity> entities = MobNPC.this.getTargets(s[1].split("-"));
                     for (Entity entity : entities) {
-                        if (!(entity == null)) {
+                        if (entity != null) {
                             entity.fireTicks = tick;
                         }
                     }

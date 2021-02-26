@@ -86,6 +86,8 @@ public class MRPGNPC extends PluginBase {
                                     }
                                 }
                             }
+                            sender.sendMessage("§a성공적으로 제거하였습니다.");
+                            break;
                         }
                         case "drops": {
                             for (Level level : getServer().getLevels().values()) {
@@ -95,6 +97,7 @@ public class MRPGNPC extends PluginBase {
                                     }
                                 }
                             }
+                            sender.sendMessage("§a성공적으로 제거하였습니다.");
                         }
                     }
                 }

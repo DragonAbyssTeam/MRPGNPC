@@ -137,18 +137,6 @@ public class MRPGNPC extends PluginBase {
                     }
                     return false;
                 }
-                case "test": {
-                    if (sender instanceof Player) {
-                        Location spawnLocation = ((Player) sender).getLocation();
-                        String mobfile = "测试A号";
-                        String mobFeature = "MDungeon" + ":" + mobfile + ":" + "" + ":" + 0;
-                        MobNPC npc = MRPGNPC.mrpgnpc.spawnNPC(Server.getInstance().getConsoleSender(), mobfile, spawnLocation, mobFeature);
-                        npc.getActiveAttackCreature().add("MDungeon");
-                        npc.getUnAttractiveCreature().add("NotMDungeon");
-                        npc.spawnToAll();
-                        return true;
-                    }
-                }
                 case "point": {
                     if (args.length <= 1) return false;
                     switch (args[1]) {

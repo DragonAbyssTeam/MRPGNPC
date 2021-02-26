@@ -28,13 +28,6 @@
             <version>1.16.16</version>
             <scope>provided</scope>
         </dependency>
-        <dependency>
-            <groupId>com.muffinhead</groupId>
-            <artifactId>mdungeon</artifactId>
-            <version>1.0.0</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/src/main/resources/lib/mdungeon.jar</systemPath>
-        </dependency>
     </dependencies>
 
     <build>

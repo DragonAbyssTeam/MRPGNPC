@@ -40,6 +40,12 @@ public class MobNPC extends NPC {
         super(chunk, nbt);
     }
 
+    @Override
+    public boolean onUpdate(int currentTick) {
+        if(this.y < 0) this.kill();
+        return super.onUpdate(currentTick);
+    }
+
     public static void sendSkinChangePacket(EntityHuman player) {
         PlayerSkinPacket pk = new PlayerSkinPacket();
         pk.newSkinName = "new";

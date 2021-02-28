@@ -375,12 +375,16 @@ public class MobNPC extends NPC {
                     List<Entity> entities = MobNPC.this.getTargets(s[1].split("-"));
                     String title = s[2];
                     String subTitle = s[3];
+                    int fadeIn = Integer.parseInt(s[4]);
+                    int stay = Integer.parseInt(s[5]);
+                    int fadeOut = Integer.parseInt(s[6]);
+
                     for (Entity entity : entities) {
                         if (!(entity == null)) {
                             if (entity instanceof Player) {
                                 title = recoverString(title);
                                 subTitle = recoverString(subTitle);
-                                ((Player) entity).sendTitle(title, subTitle);
+                                ((Player) entity).sendTitle(title, subTitle, fadeIn, stay, fadeOut);
                             }
                         }
                     }

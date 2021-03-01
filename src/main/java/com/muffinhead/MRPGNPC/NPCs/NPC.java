@@ -32,6 +32,7 @@ import cn.nukkit.utils.DummyBossBar;
 import com.muffinhead.MRPGNPC.MRPGNPC;
 import lombok.Getter;
 import lombok.Setter;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
@@ -1181,43 +1182,37 @@ public class NPC extends EntityHuman {
 
     public String recoverString(String s) {
         if (target != null) {
-            s = s.replaceAll("target\\.name", target.getName());
-        }
-        if (target != null) {
-            s = s.replaceAll("target\\.health", target.getHealth() + "");
-        }
-        if (target != null) {
-            s = s.replaceAll("target\\.x", target.x + "");
+            s = StringUtils.replace(s, "target.name", target.getName());
+            s = StringUtils.replace(s,"target.health", target.getHealth() + "");
+            s = StringUtils.replace(s,"target.x", target.x + "");
+            s = StringUtils.replace(s,"target.y", target.y + "");
+            s = StringUtils.replace(s,"target.z", target.z + "");
         } else {
-            s = s.replaceAll("target\\.x", this.x + "");
+            s = StringUtils.replace(s,"target.x", this.x + "");
+            s = StringUtils.replace(s,"target.y", this.y + "");
+            s = StringUtils.replace(s,"target.z", this.z + "");
         }
-        if (target != null) {
-            s = s.replaceAll("target\\.y", target.y + "");
-        } else {
-            s = s.replaceAll("target\\.y", this.y + "");
-        }
-        if (target != null) {
-            s = s.replaceAll("target\\.z", target.z + "");
-        } else {
-            s = s.replaceAll("target\\.z", this.z + "");
-        }
+
         if (this.getLastDamageCause() != null) {
             if (this.getLastDamageCause().getCause() == EntityDamageEvent.DamageCause.ENTITY_ATTACK) {
                 if (((EntityDamageByEntityEvent) this.getLastDamageCause()).getDamager() instanceof Player) {
-                    s = s.replaceAll("damager\\.name", ((EntityDamageByEntityEvent) this.getLastDamageCause()).getDamager().getName());
+                    s = StringUtils.replace(s,"damager.name", ((EntityDamageByEntityEvent) this.getLastDamageCause()).getDamager().getName());
                 }
             }
         }
 
-        s = s
-                .replaceAll("npc\\.yaw", this.yaw + "")
-                .replaceAll("npc\\.pitch", this.pitch + "")
-                .replaceAll("npc\\.x", this.x + "")
-                .replaceAll("npc\\.y", this.y + "")
-                .replaceAll("npc\\.z", this.z + "")
-                .replaceAll("npc\\.health", this.getHealth() + "")
-                .replaceAll("npc\\.damage", this.damage + "");
+        String[] searchStrings = {
+                "npc.yaw", "npc.pitch",
+                "npc.x", "npc.y", "npc.z",
+                "npc.health", "npc.damage"
+        };
+        String[] replacements = {
+                Double.toString(this.yaw), Double.toString(this.pitch),
+                Double.toString(this.x), Double.toString(this.y), Double.toString(this.z),
+                Double.toString(this.health), Double.toString(this.damage)
+        };
 
+        s = StringUtils.replaceEach(s, searchStrings, replacements);
         return s;
     }
 

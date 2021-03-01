@@ -16,6 +16,7 @@ import cn.nukkit.math.Vector3;
 import com.muffinhead.MRPGNPC.Effects.Bullet;
 import com.muffinhead.MRPGNPC.NPCs.MobNPC;
 import com.muffinhead.MRPGNPC.NPCs.NPC;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.Collections;
 import java.util.List;
@@ -57,7 +58,8 @@ public class MobNPCBeAttack implements Listener {
                 }
                 //defense
                 float damage = event.getFinalDamage();
-                damage = (float) ((MobNPC) entity).readEntityParameters(((MobNPC) entity).getDefenseFormula().replaceAll("source\\.damage", damage + ""));
+                damage = (float) ((MobNPC) entity).readEntityParameters(
+                        StringUtils.replace(((MobNPC) entity).getDefenseFormula(), "source.damage", Double.toString(damage)));
                 event.setDamage(damage);
                 //defense
                 //checkbedamagedcd
@@ -192,7 +194,7 @@ public class MobNPCBeAttack implements Listener {
         if (!damagers.isEmpty()) {
             Collections.shuffle(damagers);
             if (Server.getInstance().getPlayer(damagers.get(0).getName()) != null) {
-                finalCommand = finalCommand.replaceAll("\\{damager\\.name}", damagers.get(0).getName());
+                finalCommand = StringUtils.replace(finalCommand, "{damager.name}", damagers.get(0).getName());
             } else {
                 return;
             }
@@ -205,7 +207,7 @@ public class MobNPCBeAttack implements Listener {
         if (!haters.isEmpty()) {
             Collections.shuffle(haters);
             if (Server.getInstance().getPlayer(haters.get(0).getName()) != null) {
-                finalCommand = finalCommand.replaceAll("\\{hater\\.name}", haters.get(0).getName());
+                finalCommand = StringUtils.replace(finalCommand, "{hater.name}", haters.get(0).getName());
             } else {
                 return;
             }
@@ -218,7 +220,7 @@ public class MobNPCBeAttack implements Listener {
             if (npc.getLastDamageCause() instanceof EntityDamageByEntityEvent) {
                 Entity killer = ((EntityDamageByEntityEvent) npc.getLastDamageCause()).getDamager();
                 if (killer instanceof Player) {
-                    finalCommand = finalCommand.replaceAll("\\{killer\\.name}", killer.getName());
+                    finalCommand = StringUtils.replace(finalCommand, "{killer.name}", killer.getName());
                 } else {
                     return;
                 }
@@ -234,14 +236,14 @@ public class MobNPCBeAttack implements Listener {
             if (finalCommand.contains("{all.damagers.name}")) {
                 for (Entity player : npc.getDamagePool().keySet()) {
                     if (player instanceof Player) {
-                        Server.getInstance().dispatchCommand(sender, finalCommand.replaceAll("\\{all\\.damagers\\.name}", player.getName()));
+                        Server.getInstance().dispatchCommand(sender, StringUtils.replace(finalCommand, "{all.damagers.name}", player.getName()));
                     }
                 }
             }
             if (finalCommand.contains("{all.haters.name}")) {
                 for (Entity player : npc.getHatePool().keySet()) {
                     if (player instanceof Player) {
-                        Server.getInstance().dispatchCommand(sender, finalCommand.replaceAll("\\{all\\.haters\\.name}", player.getName()));
+                        Server.getInstance().dispatchCommand(sender, StringUtils.replace(finalCommand, "{all.haters.name}", player.getName()));
                     }
                 }
             }

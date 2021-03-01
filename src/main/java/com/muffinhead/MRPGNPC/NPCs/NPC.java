@@ -1201,15 +1201,22 @@ public class NPC extends EntityHuman {
             }
         }
 
+        float shield;
+        if(this.status.containsKey("Shield")){
+            shield = (float) ((ConcurrentHashMap) this.status.get("Shield")).getOrDefault("Value", 0f);
+        }else{
+            shield = 0;
+        }
+
         String[] searchStrings = {
                 "npc.yaw", "npc.pitch",
                 "npc.x", "npc.y", "npc.z",
-                "npc.health", "npc.damage"
+                "npc.health", "npc.damage", "npc.shield.health"
         };
         String[] replacements = {
                 Double.toString(this.yaw), Double.toString(this.pitch),
                 Double.toString(this.x), Double.toString(this.y), Double.toString(this.z),
-                Double.toString(this.health), Double.toString(this.damage)
+                Double.toString(this.health), Double.toString(this.damage), Float.toString(shield)
         };
 
         s = StringUtils.replaceEach(s, searchStrings, replacements);

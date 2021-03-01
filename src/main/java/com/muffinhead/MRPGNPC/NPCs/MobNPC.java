@@ -47,6 +47,7 @@ public class MobNPC extends NPC {
     public boolean onUpdate(int currentTick) {
         if(this.y < 0) this.kill();
         if(this.getHealth() <= 0){
+            deathSkillRun();
             for (DummyBossBar bossBar : this.bossBar.values()) {
                 bossBar.destroy();
             }
@@ -129,6 +130,15 @@ public class MobNPC extends NPC {
                 readSkill(skill);
                 skillTick.put(condition + ":" + skill, Integer.parseInt(condition.split("~")[1]));
             }
+        }
+    }
+
+    public void deathSkillRun(){
+        List<String> tickSkill = GetNPCSkills(this, "onDeath");
+        for (String skillandcondition : tickSkill) {
+            //String condition = skillandcondition.split(":")[1];
+            String skill = skillandcondition.split(":")[2];
+            readSkill(skill);
         }
     }
 

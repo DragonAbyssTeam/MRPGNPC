@@ -525,6 +525,7 @@ public class MobNPC extends NPC {
                 case "Heal": {
                     double amount = readEntityParameters(s[1]);
                     this.heal((float) amount);
+                    this.level.addParticle(new HappyVillagerParticle(this.getLocation().add(0, 2 * this.scale, 0)));
                     break;
                 }
                 case "Action": {

@@ -640,6 +640,19 @@ public class MobNPC extends NPC {
                     }
                     break;
                 }
+                case "Sound": {
+                    List<Entity> entities = MobNPC.this.getTargets(s[1].split("-"));
+                    ArrayList<Player> players = new ArrayList<>();
+
+                    for (Entity entity : entities) {
+                        if(entity instanceof Player){
+                            players.add((Player) entity);
+                        }
+                    }
+
+                    this.getLevel().addSound(this.getLocation(), Sound.valueOf(s[2]), 1, 1, players);
+                    break;
+                }
                 /*
                 case "SummonMob": {
                     Config config = MRPGNPC.mobconfigs.get(s[1]);

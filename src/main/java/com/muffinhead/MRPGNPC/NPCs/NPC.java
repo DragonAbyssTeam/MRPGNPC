@@ -322,7 +322,7 @@ public class NPC extends EntityHuman {
                 moveTowards(this.target.getPosition());
             } else {
                 this.hatePool.remove(target);
-                cantAttractiveTarget.put(target, (int) Math.round(20 * this.distance(spawnPosition) / speed));
+                //cantAttractiveTarget.put(target, (int) Math.round(20 * this.distance(spawnPosition) / speed));
                 this.resetTarget();
             }
         } else {

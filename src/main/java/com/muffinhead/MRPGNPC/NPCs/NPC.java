@@ -28,6 +28,7 @@ import cn.nukkit.network.protocol.PlayerSkinPacket;
 import cn.nukkit.network.protocol.SetEntityLinkPacket;
 import cn.nukkit.potion.Effect;
 import cn.nukkit.scheduler.Task;
+import cn.nukkit.utils.DummyBossBar;
 import com.muffinhead.MRPGNPC.MRPGNPC;
 import lombok.Getter;
 import lombok.Setter;
@@ -47,6 +48,9 @@ public class NPC extends EntityHuman {
     public int nhHealTick = 0;
     public List<String> skills = new ArrayList<>();
     public ConcurrentHashMap<String, Object> status = new ConcurrentHashMap<>();
+    public ConcurrentHashMap<String, DummyBossBar> bossBar = new ConcurrentHashMap<>();     //MobNpc
+    protected boolean useBossbar = true;
+    protected String bossbarName = "";
     protected boolean isAttacking = false;
     protected String camp = "Example";
     protected Position spawnPosition;
@@ -83,7 +87,6 @@ public class NPC extends EntityHuman {
     private double frontX;
     private double frontY;
     private double frontZ;
-
 
     public NPC(FullChunk chunk, CompoundTag nbt) {
         super(chunk, nbt.putCompound("Skin", new CompoundTag()));
@@ -298,6 +301,19 @@ public class NPC extends EntityHuman {
         }
     }
 
+    public void resetTarget(){
+        if(target instanceof Player) {
+            DummyBossBar bossBar = this.bossBar.get(target.getName());
+
+            if (bossBar != null) {
+                bossBar.destroy();
+                this.bossBar.remove(target.getName());
+            }
+        }
+
+        target = null;
+    }
+
     //
     public void onMove() {
         if (this.target != null) {
@@ -306,7 +322,7 @@ public class NPC extends EntityHuman {
             } else {
                 this.hatePool.remove(target);
                 cantAttractiveTarget.put(target, (int) Math.round(20 * this.distance(spawnPosition) / speed));
-                this.target = null;
+                this.resetTarget();
             }
         } else {
             this.moveTowards(this.spawnPosition);
@@ -317,17 +333,17 @@ public class NPC extends EntityHuman {
     public void checkTargetCanBeChoose() {
         if (this.target != null && this.target instanceof Player) {
             if (!((Player) this.target).isOnline()) {
-                this.target = null;
+                this.resetTarget();
             }
         }
         if (this.target != null && !this.target.isAlive()) {
-            this.target = null;
+            this.resetTarget();
         }
         if (this.target != null && !this.level.getName().equals(this.target.getLevel().getName())) {
-            this.target = null;
+            this.resetTarget();
         }
         if (this.target != null && this.target.distance((Vector3) this) > this.hateRange) {
-            this.target = null;
+            this.resetTarget();
         }
 
     }

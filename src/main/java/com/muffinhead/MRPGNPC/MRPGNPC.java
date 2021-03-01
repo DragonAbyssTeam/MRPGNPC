@@ -226,6 +226,8 @@ public class MRPGNPC extends PluginBase {
     public Config createMobConfig(String configPath) {
         Config config = new Config(configPath, Config.YAML);
         config.set("DisplayName", "Mob");
+        config.set("BossbarName", "BoossBar");
+        config.set("UseBossbar", true);
         config.set("MaxHealth", 40);
         config.set("Size", 1.0);
         config.set("MovementSpeed", 1.0);
@@ -323,6 +325,8 @@ public class MRPGNPC extends PluginBase {
                     npc.setSkinName(config.getString("Skin"));
                     npc.setSkin(skins.get(config.getString("Skin")));
                     npc.setEnableBox(config.getBoolean("BoundingBox"));
+                    npc.setUseBossbar(config.getBoolean("UseBossbar", true));
+                    npc.setBossbarName(config.getString("BossbarName", "please set bossbar name"));
                     return npc;
                 }
             }
@@ -358,6 +362,8 @@ public class MRPGNPC extends PluginBase {
                 npc.setSkinName(config.getString("Skin"));
                 npc.setSkin(skins.get(config.getString("Skin")));
                 npc.setEnableBox(config.getBoolean("BoundingBox"));
+                npc.setUseBossbar(config.getBoolean("UseBossbar", true));
+                npc.setBossbarName(config.getString("BossbarName", "please set bossbar name"));
                 return npc;
             }
         }

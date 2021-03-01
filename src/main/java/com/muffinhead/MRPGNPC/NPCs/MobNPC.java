@@ -11,8 +11,10 @@ import cn.nukkit.event.entity.EntityDamageEvent;
 import cn.nukkit.item.Item;
 import cn.nukkit.item.enchantment.Enchantment;
 import cn.nukkit.level.Location;
+import cn.nukkit.level.Sound;
 import cn.nukkit.level.format.FullChunk;
 import cn.nukkit.level.particle.ExplodeParticle;
+import cn.nukkit.level.particle.HappyVillagerParticle;
 import cn.nukkit.level.particle.HugeExplodeSeedParticle;
 import cn.nukkit.math.Vector3;
 import cn.nukkit.math.Vector3f;
@@ -22,6 +24,7 @@ import cn.nukkit.network.protocol.SpawnParticleEffectPacket;
 import cn.nukkit.potion.Effect;
 import cn.nukkit.scheduler.Task;
 import cn.nukkit.utils.Config;
+import cn.nukkit.utils.DummyBossBar;
 import com.muffinhead.MRPGNPC.Effects.Bullet;
 import com.muffinhead.MRPGNPC.Effects.Lightning;
 import com.muffinhead.MRPGNPC.MRPGNPC;
@@ -43,6 +46,11 @@ public class MobNPC extends NPC {
     @Override
     public boolean onUpdate(int currentTick) {
         if(this.y < 0) this.kill();
+        if(this.getHealth() <= 0){
+            for (DummyBossBar bossBar : this.bossBar.values()) {
+                bossBar.destroy();
+            }
+        }
         return super.onUpdate(currentTick);
     }
 
@@ -134,6 +142,23 @@ public class MobNPC extends NPC {
     }
 
     public void beDamagedSkillRun() {
+        if(this.useBossbar) {
+            this.hatePool.forEach((entity, v) -> {
+                if (entity instanceof Player) {
+                    Player player = (Player) entity;
+                    DummyBossBar dummyBossBar;
+                    if ((dummyBossBar = this.bossBar.get(player.getName())) == null) {
+                        dummyBossBar = new DummyBossBar.Builder(player).text(this.bossbarName).build();
+
+                        player.createBossBar(dummyBossBar);
+                        this.bossBar.put(player.getName(), dummyBossBar);
+                    }
+
+                    dummyBossBar.setLength(Math.max(this.getHealth() / this.getMaxHealth() * 100, 1));
+                }
+            });
+        }
+
         List<String> beDamagedSkill = GetNPCSkills(this, "onBeDamaged");
         for (String skillandcondition : beDamagedSkill) {
             String condition = skillandcondition.split(":")[1];

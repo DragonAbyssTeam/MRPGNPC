@@ -37,7 +37,7 @@ public class MobNPCBeAttack implements Listener {
         }
     }
 
-    @EventHandler(priority = EventPriority.MONITOR)
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void onDamaged(EntityDamageEvent event) {
         Entity entity = event.getEntity();
         if (entity instanceof MobNPC) {

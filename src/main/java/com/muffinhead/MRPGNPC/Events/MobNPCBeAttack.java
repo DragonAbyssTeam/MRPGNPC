@@ -99,6 +99,13 @@ public class MobNPCBeAttack implements Listener {
                 event.setAttackCooldown(0);
                 //prevent mob's in poison or some effect that player can't hurt mobnpc.
             }
+        }else if(event instanceof EntityDamageByEntityEvent){
+            Entity damager = ((EntityDamageByEntityEvent) event).getDamager();
+
+            if(damager instanceof MobNPC){
+                MobNPC mobNPC = (MobNPC) damager;
+                mobNPC.damageSkillRun();
+            }
         }
     }
 

@@ -93,6 +93,7 @@ public class MobNPCBeAttack implements Listener {
                     ((MobNPC) entity).setHatePool(hatepool);
                     ((MobNPC) entity).setDamagePool(damagepool);
                     KnockBackNPC((MobNPC) entity, (EntityDamageByEntityEvent) event);
+                    ((MobNPC) entity).setTarget(damager);
                 }
             }
             if (event.getCause() == EntityDamageEvent.DamageCause.MAGIC) {

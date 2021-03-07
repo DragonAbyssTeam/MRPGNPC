@@ -39,45 +39,46 @@ public class MobNPCBeAttack implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onDamaged(EntityDamageEvent event) {
-        Entity entity = event.getEntity();
-        if (entity instanceof MobNPC) {
-            //particle
-            if (!event.isCancelled()) {
-                ((MobNPC) entity).beattackparticle();
-            }
-            //particle
-            //attackcooldown 0
-            //attackcooldown 0
+        if (event.getEntity() instanceof MobNPC) {
+            MobNPC mobNPC = (MobNPC) event.getEntity();;
             //hatepool damagepool
             if (event instanceof EntityDamageByEntityEvent) {
                 event.setAttackCooldown(0);
                 Entity damager = ((EntityDamageByEntityEvent) event).getDamager();
                 //cant attractive target can't damage npc
-                if (((MobNPC) entity).getCantAttractiveTarget().containsKey(damager)) {
+                if (mobNPC.getCantAttractiveTarget().containsKey(damager)) {
                     event.setCancelled();
                 }
                 //defense
                 float damage = event.getFinalDamage();
-                damage = (float) ((MobNPC) entity).readEntityParameters(
-                        StringUtils.replace(((MobNPC) entity).getDefenseFormula(), "source.damage", Double.toString(damage)));
+                damage = (float) mobNPC.readEntityParameters(
+                        StringUtils.replace(mobNPC.getDefenseFormula(), "source.damage", Double.toString(damage)));
                 event.setDamage(damage);
-                //defense
                 //checkbedamagedcd
                 onCheckCanEntityAttack((EntityDamageByEntityEvent) event);
-                //checkbedamagedcd
 
                 //shield
-                if (onCheckShield(((MobNPC) entity))) {
-                    if (!checkShieldWillHurtHealth(((MobNPC) entity))) {
+                if (onCheckShield(mobNPC)) {
+                    if (!checkShieldWillHurtHealth(mobNPC)) {
                         event.setCancelled();
                     }
-                    onReduceShield(((MobNPC) entity), event);
+                    onReduceShield(mobNPC, event);
                 }
-                //shield
+
+                ConcurrentHashMap<Entity, Float> damagepool = mobNPC.getDamagePool();
+                ConcurrentHashMap<Entity, Float> hatepool = mobNPC.getHatePool();
+
+                if(mobNPC.getMaxNumberOfTargets() <= hatepool.size()){
+                    event.setCancelled();
+                    if(damager instanceof Player){
+                        ((Player) damager).sendPopup("§o§f해당 몹은 공격할 수 없습니다");
+                    }
+                }
+
                 //cant attractive target can't damage npc
                 if (!event.isCancelled()) {
-                    ConcurrentHashMap<Entity, Float> damagepool = ((MobNPC) entity).getDamagePool();
-                    ConcurrentHashMap<Entity, Float> hatepool = ((MobNPC) entity).getHatePool();
+                    //particle
+                    mobNPC.beattackparticle();
                     //
                     if (damagepool.containsKey(damager)) {
                         damagepool.put(damager, damagepool.get(damager) + event.getDamage());
@@ -90,10 +91,10 @@ public class MobNPCBeAttack implements Listener {
                         hatepool.put(damager, event.getDamage());
                     }
                     //
-                    ((MobNPC) entity).setHatePool(hatepool);
-                    ((MobNPC) entity).setDamagePool(damagepool);
-                    KnockBackNPC((MobNPC) entity, (EntityDamageByEntityEvent) event);
-                    ((MobNPC) entity).setTarget(damager);
+                    mobNPC.setHatePool(hatepool);
+                    mobNPC.setDamagePool(damagepool);
+                    KnockBackNPC(mobNPC, (EntityDamageByEntityEvent) event);
+                    mobNPC.setTarget(damager);
                 }
             }
             if (event.getCause() == EntityDamageEvent.DamageCause.MAGIC) {

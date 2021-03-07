@@ -50,6 +50,7 @@ public class NPC extends EntityHuman {
     public List<String> skills = new ArrayList<>();
     public ConcurrentHashMap<String, Object> status = new ConcurrentHashMap<>();
     public ConcurrentHashMap<String, DummyBossBar> bossBar = new ConcurrentHashMap<>();     //MobNpc
+    protected int maxNumberOfTargets = 10;
     protected boolean useBossbar = true;
     protected String bossbarName = "";
     protected boolean isAttacking = false;

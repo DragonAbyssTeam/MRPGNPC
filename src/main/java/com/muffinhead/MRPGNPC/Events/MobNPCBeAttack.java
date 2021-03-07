@@ -127,9 +127,9 @@ public class MobNPCBeAttack implements Listener {
         Entity damager = event.getDamager();
         if (npc.isCanBeKnockback()) {
             double frontYaw = ((damager.yaw + 90.0D) * Math.PI) / 180.0D;
-            double frontX = event.getKnockBack() * 5 * Math.cos(frontYaw);
-            double frontZ = event.getKnockBack() * 5 * Math.sin(frontYaw);
-            double frontY = event.getKnockBack() * 2;
+            double frontX = event.getKnockBack() * 2 * Math.cos(frontYaw);
+            double frontZ = event.getKnockBack() * 2 * Math.sin(frontYaw);
+            double frontY = event.getKnockBack() / 3;
             npc.setMotion(new Vector3(frontX, frontY, frontZ));
         } else {
             event.setKnockBack(0);

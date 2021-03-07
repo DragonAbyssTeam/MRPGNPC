@@ -393,6 +393,15 @@ public class MobNPC extends NPC {
                     }
                     break;
                 }
+                case "AddExperience": {
+                    List<Entity> entities = MobNPC.this.getTargets(s[1].split("-"));
+                    int add = Integer.parseInt(s[2]);
+                    for (Entity entity : entities) {
+                        if(entity instanceof Player){
+                            ((Player) entity).addExperience(add);
+                        }
+                    }
+                }
                 case "Message": {
                     List<Entity> entities = MobNPC.this.getTargets(s[1].split("-"));
                     String mes = s[2];
@@ -617,10 +626,10 @@ public class MobNPC extends NPC {
                 case "TornadoParticle": {
                     List<Entity> entities = MobNPC.this.getTargets(s[1].split("-"));
                     String identifier = s[2];
-                    double turns = Double.parseDouble(s[3]);
+                    /*double turns = Double.parseDouble(s[3]);
                     double startY = readEntityParameters(s[4]);
                     double ys = readEntityParameters(s[5]);
-                    double addRadius = readEntityParameters(s[6]);
+                    double addRadius = readEntityParameters(s[6]);*/
                     /*
                     for (double radius = 0, y = startY, degree = 0; degree < 360 * turns; degree+=10, y += ys, radius += addRadius) {
                         double radians = Math.toRadians(degree);
@@ -656,7 +665,7 @@ public class MobNPC extends NPC {
                         vector.x = (float) this.x;
                         vector.y = (float) this.y;
                         vector.z = (float) this.z;
-                        vector.add((float) x, 0, (float) y);
+                        vector.add((float) x, (float) radians, (float) y);
                         SpawnParticleEffectPacket pk = new SpawnParticleEffectPacket();
                         pk.identifier = "minecraft:" + identifier;
                         pk.position = vector;

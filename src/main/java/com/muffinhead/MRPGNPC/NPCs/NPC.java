@@ -96,7 +96,8 @@ public class NPC extends EntityHuman {
                 .putString("ModelID", this.skin.getSkinId())
                 .putString("ModelId", this.skin.getSkinId())
                 .putString("GeometryName", this.geometryName)
-                .putByteArray("GeometryData", this.skin.getGeometryData().getBytes(StandardCharsets.UTF_8));
+                .putByteArray("GeometryData", this.skin.getGeometryData().getBytes(StandardCharsets.UTF_8)
+                .putBoolean("IsTrustedSkin", true));
         spawnPosition = getPosition();
 //teleport to avoid invisible bug
         this.teleport(new Vector3(this.x + 0.1, this.y, this.z + 0.1));
@@ -303,8 +304,8 @@ public class NPC extends EntityHuman {
         }
     }
 
-    public void resetTarget(){
-        if(target instanceof Player) {
+    public void resetTarget() {
+        if (target instanceof Player) {
             DummyBossBar bossBar = this.bossBar.get(target.getName());
 
             if (bossBar != null) {
@@ -1184,28 +1185,28 @@ public class NPC extends EntityHuman {
     public String recoverString(String s) {
         if (target != null) {
             s = StringUtils.replace(s, "target.name", target.getName());
-            s = StringUtils.replace(s,"target.health", target.getHealth() + "");
-            s = StringUtils.replace(s,"target.x", target.x + "");
-            s = StringUtils.replace(s,"target.y", target.y + "");
-            s = StringUtils.replace(s,"target.z", target.z + "");
+            s = StringUtils.replace(s, "target.health", target.getHealth() + "");
+            s = StringUtils.replace(s, "target.x", target.x + "");
+            s = StringUtils.replace(s, "target.y", target.y + "");
+            s = StringUtils.replace(s, "target.z", target.z + "");
         } else {
-            s = StringUtils.replace(s,"target.x", this.x + "");
-            s = StringUtils.replace(s,"target.y", this.y + "");
-            s = StringUtils.replace(s,"target.z", this.z + "");
+            s = StringUtils.replace(s, "target.x", this.x + "");
+            s = StringUtils.replace(s, "target.y", this.y + "");
+            s = StringUtils.replace(s, "target.z", this.z + "");
         }
 
         if (this.getLastDamageCause() != null) {
             if (this.getLastDamageCause().getCause() == EntityDamageEvent.DamageCause.ENTITY_ATTACK) {
                 if (((EntityDamageByEntityEvent) this.getLastDamageCause()).getDamager() instanceof Player) {
-                    s = StringUtils.replace(s,"damager.name", ((EntityDamageByEntityEvent) this.getLastDamageCause()).getDamager().getName());
+                    s = StringUtils.replace(s, "damager.name", ((EntityDamageByEntityEvent) this.getLastDamageCause()).getDamager().getName());
                 }
             }
         }
 
         float shield;
-        if(this.status.containsKey("Shield")){
+        if (this.status.containsKey("Shield")) {
             shield = (float) ((ConcurrentHashMap) this.status.get("Shield")).getOrDefault("Value", 0f);
-        }else{
+        } else {
             shield = 0;
         }
 
